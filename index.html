@@ -87,7 +87,7 @@ td{padding:9px 8px;border-bottom:1px solid #f0f0f2;vertical-align:top}tr.row-cli
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* Nova Deploy frontend. It never runs a model and holds no secrets: every protected action goes to the server (Edge Functions + Postgres). */
-const SBCFG={url:'',key:''};
+const SBCFG={url:'https://jtstdajaaasucialvsfs.supabase.co',key:'sb_publishable_1O9wO2dY_ZFFfdPFGaLeMA_3oaW2Hs-'};
 const $=s=>document.querySelector(s),nf=n=>Number(n||0).toLocaleString(),hex=n=>[...crypto.getRandomValues(new Uint8Array(n))].map(b=>b.toString(16).padStart(2,'0')).join('');
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fd=d=>d?new Date(d).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}):'—';
