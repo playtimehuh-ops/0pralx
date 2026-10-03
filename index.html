@@ -82,7 +82,7 @@ td{padding:9px 8px;border-bottom:1px solid #f0f0f2;vertical-align:top}tr.row-cli
 <div id="msgs"></div><div class="composer"><textarea id="cIn" rows="2" placeholder="Message your model…"></textarea><div class="crow"><span class="chip" id="cMeta"></span><button class="send" id="bSend">↑</button></div></div><div id="cErr" class="err"></div></section>
 <section class="tab" id="t-keys"><div id="keysBox"></div></section>
 <section class="tab" id="t-billing"><div id="billBox"></div></section><section class="tab" id="t-admin"><div id="adminBox"></div></section>
-</div></section>
+</div><footer style="padding:28px 24px;border-top:1px solid var(--line);margin-top:40px;display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-size:12px"><a href="#" style="color:#000" data-legal="terms">Terms of Service</a><a href="#" style="color:#000" data-legal="privacy">Privacy Policy</a><a href="#" style="color:#000" data-legal="refund">Refund & Payment Policy</a><a href="#" style="color:#000" data-legal="acceptable">Acceptable Use</a></footer></section>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* Nova Deploy frontend. It never runs a model and holds no secrets: every protected action goes to the server (Edge Functions + Postgres). */
@@ -369,5 +369,5 @@ async function loadBilling(){await refreshAcct();const h=await q(sb.from('deploy
  document.getElementById('legalClose').onclick=()=>ov.style.display='none';
  ov.addEventListener('click',e=>{if(e.target===ov)ov.style.display='none'});
 })();
-</script><footer style="padding:28px 24px;border-top:1px solid var(--line);margin-top:40px;display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-size:12px"><a href="#" style="color:#000" data-legal="terms">Terms of Service</a><a href="#" style="color:#000" data-legal="privacy">Privacy Policy</a><a href="#" style="color:#000" data-legal="refund">Refund & Payment Policy</a><a href="#" style="color:#000" data-legal="acceptable">Acceptable Use</a></footer>
+</script>
 </body></html>
