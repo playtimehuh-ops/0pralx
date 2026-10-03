@@ -57,13 +57,13 @@ const cache = new Map<string, { sha: string; m: any; t: any }>();
 export async function loadModel(row: { id: string; owner: string; sha: string; source?: any }) {
   const hit = cache.get(row.id);
   if (hit && hit.sha === row.sha) return hit;
-  const url = String(row.source?.url ?? "");
-  let u: URL;
-  try { u = new URL(url); } catch { throw new HttpErr(500, "weights_unavailable", "Model storage URL is invalid"); }
-  if (u.protocol !== "https:" || u.hostname !== "swift.subnp.com") throw new HttpErr(500, "weights_unavailable", "Model storage URL is not allowed");
-  const r = await fetch(u.toString(), { redirect: "error", headers: { "Accept": "application/gzip,application/octet-stream,*/*" } });
-  if (!r.ok || !r.body) throw new HttpErr(500, "weights_unavailable", "Model weights could not be loaded");
-  const text = new TextDecoder().decode(await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
+  const path = String(row.source?.path ?? "");
+  if (!path || !path.startsWith(row.owner + "/") || !/^[0-9a-f-]{36}\\/mdl_[0-9a-f]{10}\\.json\\.gz$/.test(path))
+    throw new HttpErr(500, "weights_unavailable", "Model storage path is invalid");
+  const { data: object, error } = await admin.storage.from("nova-deploy-models").download(path);
+  if (error || !object) throw new HttpErr(500, "weights_unavailable", "Model weights could not be loaded");
+  const compressed = new Uint8Array(await object.arrayBuffer());
+  const text = new TextDecoder().decode(await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
   if (await sha256(text) !== row.sha) throw new HttpErr(500, "integrity", "Stored weights failed the integrity check");
   const e = { sha: row.sha, ...buildModel(JSON.parse(text)) };
   cache.set(row.id, e); if (cache.size > 3) cache.delete(cache.keys().next().value!);
