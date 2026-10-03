@@ -101,7 +101,7 @@ export async function runChat(a: { userId: string; modelId: string; messages: Ms
   let out: number[], ms: number;
   try {
     const t0 = performance.now();
-    out = m.generate(ids, maxTok, temp, st.topK || 30, st.topP || 0.9, { stop: false });
+    out = m.generateFast(ids, maxTok, temp, st.topK || 30, st.topP || 0.9, { stop: false });
     ms = Math.round(performance.now() - t0);
   } catch (_e) {
     await admin.rpc("deploy_release_credits", { p_alloc: alloc, p_amount: reserve });   // failed runs cost nothing
