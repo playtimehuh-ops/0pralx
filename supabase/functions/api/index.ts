@@ -26,7 +26,21 @@ Deno.serve(async (req) => {
     const userClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } } });
     const { data: { user } } = await userClient.auth.getUser();
     if (!user) throw new HttpErr(401, "unauthenticated", "Sign in first.");
-    const b = await req.json(); const uid = user.id;
+    const uid = user.id;
+    const uploadAction = req.headers.get("x-nova-action");
+    if (req.method === "POST" && uploadAction === "upload_model") {
+      await requireAccess(uid);
+      const storagePath = String(req.headers.get("x-nova-storage-path") ?? "");
+      if (!/^[0-9a-f]{8}-[0-9a-f-]{27}\\/mdl_[0-9a-f]{10}\\.json\\.gz$/.test(storagePath) || !storagePath.startsWith(uid + "/"))
+        throw new HttpErr(400, "bad_source", "Invalid model storage path.");
+      const bytes = new Uint8Array(await req.arrayBuffer());
+      if (!bytes.byteLength) throw new HttpErr(400, "empty_upload", "The model upload is empty.");
+      if (bytes.byteLength > 50 * 1024 * 1024) throw new HttpErr(413, "model_too_large", "Model file is too large.");
+      const { error } = await admin.storage.from("nova-deploy-models").upload(storagePath, bytes, { contentType: "application/gzip", cacheControl: "3600", upsert: false });
+      if (error) throw new HttpErr(400, "storage_upload_failed", error.message);
+      return json({ path: storagePath, bytes: bytes.byteLength });
+    }
+    const b = await req.json();
 
     switch (b.action) {
       case "register_model": {
