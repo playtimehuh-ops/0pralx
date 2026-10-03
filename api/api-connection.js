@@ -5,6 +5,7 @@ const MAX_BODY_BYTES = 64 * 1024;
 const IP_LIMIT = 120;
 const KEY_LIMIT = 60;
 const IP_BURST = 12;
+const modelCache = new Map();
 const KEY_BURST = 8;
 const BURST_WINDOW_MS = 10_000;
 
@@ -114,16 +115,24 @@ export default async function handler(req, res) {
     try { prep=await runtime({action:"prepare",modelId:String(body.modelId||""),messages:body.messages,maxTokens:body.maxTokens,temperature:body.temperature}); }
     catch(x){ reject(res,x.code==="subscription_required"?402:400,x.code||"runtime_error",x.message); return; }
     try {
-      const r=await fetch(prep.signedUrl,{cache:"no-store"});
-      if(!r.ok)throw new Error("weights_download_failed");
-      const compressed=new Uint8Array(await r.arrayBuffer());
-      const digest=[...new Uint8Array(await crypto.subtle.digest("SHA-256",compressed))].map(b=>b.toString(16).padStart(2,"0")).join("");
-      if(digest!==prep.sha)throw new Error("integrity");
-      const raw=await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
-      const o=JSON.parse(new TextDecoder().decode(raw));
-      const t=BPETokenizer.fromJSON(o.tokenizer),m=new NovaModel(o.vocabSize,o.config),d=m.cfg.dModel;
-      if(t.size!==o.vocabSize||o.weights.wte?.length!==o.vocabSize*d||o.weights.wpe?.length!==m.cfg.ctxLen*d||o.weights.layers?.length!==m.cfg.nLayers)throw new Error("weight_shapes");
-      m.loadWeights(o.weights);m.eosId=t.vocab["<EOS>"];
+      let t, m;
+      const cached=modelCache.get(prep.modelId);
+      if(cached && cached.sha===prep.sha){
+        ({t,m}=cached);
+      }else{
+        const r=await fetch(prep.signedUrl,{cache:"no-store"});
+        if(!r.ok)throw new Error("weights_download_failed");
+        const compressed=new Uint8Array(await r.arrayBuffer());
+        const digest=[...new Uint8Array(await crypto.subtle.digest("SHA-256",compressed))].map(b=>b.toString(16).padStart(2,"0")).join("");
+        if(digest!==prep.sha)throw new Error("integrity");
+        const raw=await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
+        const o=JSON.parse(new TextDecoder().decode(raw));
+        t=BPETokenizer.fromJSON(o.tokenizer); m=new NovaModel(o.vocabSize,o.config); const d=m.cfg.dModel;
+        if(t.size!==o.vocabSize||o.weights.wte?.length!==o.vocabSize*d||o.weights.wpe?.length!==m.cfg.ctxLen*d||o.weights.layers?.length!==m.cfg.nLayers)throw new Error("weight_shapes");
+        m.loadWeights(o.weights);m.eosId=t.vocab["<EOS>"];
+        modelCache.set(prep.modelId,{sha:prep.sha,t,m});
+        if(modelCache.size>3)modelCache.delete(modelCache.keys().next().value);
+      }
       const ids=t.encode(prep.prompt),t0=performance.now(),out=m.generateFast(ids,prep.maxTok,prep.temp,prep.settings?.topK||30,prep.settings?.topP||.9,{stop:false}),ms=Math.round(performance.now()-t0);
       let reply=t.decode(out.slice(ids.length)),cut=reply.indexOf("\nUser:");if(cut>=0)reply=reply.slice(0,cut);
       const outTok=out.length-ids.length,actual=ids.length*prep.creditsIn+outTok*prep.creditsOut;
