@@ -156,20 +156,24 @@ function editDlg(m){const s=m.settings;dlg(`<h2>Set up “${esc(m.name)}”</h2>
   try{await call('update_model',{id:m.id,name:$('#eN').value,settings:{desc:$('#eD').value,temp:+$('#eT').value,topK:+$('#eK').value,topP:+$('#eP').value,maxTok:+$('#eM').value}});c();loadModels()}catch(x){$('#eE').textContent=x.message}})}
 const can=()=>{if(!S){authDlg();return false}if(!A||!A.access){needSub();return false}return true};
 
-/* Model storage: Nova sends the compressed model to our server-side SwiftCDN proxy. The SwiftCDN API key never reaches the browser. */
+/* Model storage: private Supabase Storage. Upload authorization is enforced by Storage RLS,
+   and the server later reads the object with the service role. No storage secret reaches the browser. */
 async function gzipBlob(blob){
   if(!('CompressionStream' in window)) throw Error('This browser does not support compressed model uploads.');
   const stream=blob.stream().pipeThrough(new CompressionStream('gzip'));
   return new Blob([await new Response(stream).arrayBuffer()],{type:'application/gzip'});
 }
-async function swiftUpload(blob,name,onProgress){
-  const form=new FormData();form.append('file',blob,name);
+async function storageUpload(blob,path,onProgress){
+  if(!sb||!S) throw Error('Sign in before uploading a model.');
   onProgress&&onProgress(0,blob.size);
-  const r=await fetch('/api/swift-upload',{method:'POST',body:form});
-  const text=await r.text();let data;try{data=JSON.parse(text)}catch{data={message:text}};
-  if(!r.ok)throw Object.assign(new Error(data.message||data.error||('Upload failed ('+r.status+')')),{code:data.error,status:r.status});
-  if(!data.cdnUrl)throw Error('SwiftCDN did not return a model URL.');
-  onProgress&&onProgress(blob.size,blob.size);return data.cdnUrl;
+  const {data,error}=await sb.storage.from('nova-deploy-models').createSignedUploadUrl(path);
+  if(error||!data?.token) throw Object.assign(new Error(error?.message||'Could not create a Supabase Storage upload URL.'),{code:'storage_upload_url_failed'});
+  const {error:uploadError}=await sb.storage.from('nova-deploy-models').uploadToSignedUrl(
+    path,data.token,blob,{contentType:'application/gzip',cacheControl:'3600'}
+  );
+  if(uploadError) throw Object.assign(new Error(uploadError.message||'Supabase Storage upload failed.'),{code:'storage_upload_failed'});
+  onProgress&&onProgress(blob.size,blob.size);
+  return path;
 }
 /* ---- create & deploy ---- */
 function normalize(o){if(o&&o.format==='nova-ai-backup'){const b=o.model;if(!b||!b.weights||!b.config||!b.vocabSize)throw Error('This backup contains no trained model');if(!o.tokenizer)throw Error('This backup has no tokenizer');
@@ -183,8 +187,9 @@ $('#bCreate').onclick=async()=>{$('#dMsg').textContent='';if(!pending)return;con
  const b=$('#bCreate');b.disabled=true;b.textContent='Uploading…';
  try{const id='mdl_'+hex(5);const rawModel=JSON.stringify(pending);
   const uploadBlob=await gzipBlob(new Blob([rawModel],{type:'application/json'}));
-  const cdnUrl=await swiftUpload(uploadBlob,`${id}.json.gz`,(done,total)=>{const pct=Math.round(done/total*100);b.textContent=`Uploading… ${pct}%`;});
-  b.textContent='Validating on server…';await call('register_model',{id,name,source:{url:cdnUrl},settings:{desc:$('#dDesc').value,temp:+$('#dTemp').value,topK:+$('#dTopK').value,topP:+$('#dTopP').value,maxTok:+$('#dMax').value}});
+  const storagePath=S.id+'/'+id+'.json.gz';
+  await storageUpload(uploadBlob,storagePath,(done,total)=>{const pct=Math.round(done/total*100);b.textContent='Uploading… '+pct+'%';});
+  b.textContent='Validating on server…';await call('register_model',{id,name,source:{path:storagePath},settings:{desc:$('#dDesc').value,temp:+$('#dTemp').value,topK:+$('#dTopK').value,topP:+$('#dTopP').value,maxTok:+$('#dMax').value}});
   pending=null;tab('models')}catch(x){if(x.code==='subscription_required')needSub();else $('#dMsg').textContent=x.message}finally{b.disabled=false;b.textContent='Upload & deploy'}};
 /* ---- test: the playground runs the real model on the server and spends credits ---- */
 const addMsg=(r,t)=>{const d=document.createElement('div');d.className='m '+r;d.textContent=t;$('#msgs').appendChild(d);$('#msgs').scrollTop=1e9;return d};
