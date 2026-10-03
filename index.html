@@ -97,8 +97,7 @@ let sb=null,SBURL='',S=null,A=null,models=[],pending=null,chatMsgs=[],cur='board
 function initSB(){const url=SBCFG.url,key=SBCFG.key;
  if(!url||!key||!window.supabase)return false;SBURL=url;sb=window.supabase.createClient(url,key,{auth:{persistSession:true}});return true}
 const q=async p=>{const{data,error}=await p;if(error)throw Error(error.message);return data};
-async function call(action,body={}){const r=await sb.functions.invoke('api',{body:{action,...body}});
- if(r.error){let m=r.error.message,code;try{const j=await r.error.context.json();m=j.error||m;code=j.code}catch(e){}const e=Error(m);e.code=code;throw e}return r.data}
+async function call(action,body={}){\n if(action==='chat'){\n  const {data:{session}}=await sb.auth.getSession();\n  if(!session?.access_token)throw Error('Your session expired. Sign in again.');\n  const rr=await fetch('/api-connection',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'X-Nova-Chat':'1'},body:JSON.stringify({action:'chat',...body})});\n  const dd=await rr.json().catch(()=>({error:'Chat server returned invalid JSON.'}));\n  if(!rr.ok){const e=Error(dd.error?.message||dd.error||'Chat request failed.');e.code=dd.error?.code||dd.code;throw e}\n  return dd;\n }\n const r=await sb.functions.invoke('api',{body:{action,...body}});\n if(r.error){let m=r.error.message,code;try{const j=await r.error.context.json();m=j.error||m;code=j.code}catch(e){}const e=Error(m);e.code=code;throw e}return r.data}
 const money=()=>A?('$'+(A.price_cents/100).toFixed(2).replace(/\.00$/,'')+' / '+A.interval):'';
 const badge=s=>`<span class="st ${s}">${ST[s]}</span>`;
 function fail(e){if(e.code==='subscription_required')needSub();else if(e.code==='insufficient_credits')dlg('<h2>Out of credits</h2><p class="small">This billing period\'s credits are used up. They renew with your next successful payment.</p><button class="btn" data-x>OK</button>');else alert(e.message)}
