@@ -5,7 +5,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { admin, buildModel, config, HttpErr, runChat, sha256 } from "./_shared/run.ts";
 
 const getStripe = () => { const key = Deno.env.get("STRIPE_SECRET_KEY"); if (!key?.trim()) throw new HttpErr(503, "stripe_not_configured", "Stripe is not configured. Add STRIPE_SECRET_KEY to the Supabase Edge Function secrets."); return new Stripe(key, { httpClient: Stripe.createFetchHttpClient() }); };
-const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type" };
+const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-nova-action, x-nova-storage-path", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...cors, "Content-Type": "application/json" } });
 const sub402 = () => new HttpErr(402, "subscription_required", "An active subscription is required.");
 
@@ -54,21 +54,22 @@ Deno.serve(async (req) => {
         if (objectError || !object) throw new HttpErr(400, "no_upload", "The model file could not be downloaded from Supabase Storage.");
         const compressed = new Uint8Array(await object.arrayBuffer());
         if (compressed.byteLength > 250 * 1024 * 1024) throw new HttpErr(413, "model_too_large", "Model file is too large.");
-        try {
-          const text = new TextDecoder().decode(await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
-          const o = JSON.parse(text);
-          const { m, t } = buildModel(o);
-          m.generate(t.encode("User: hi\\nNova:"), 2, 0.8, 30, 0.9, { stop: false });
-          const { error: e2 } = await admin.from("deploy_models").insert({
-            id, owner: uid, name, version: "1.0." + (o.stepCount || 0), sha: await sha256(text),
-            settings: cleanSettings(b.settings),
-            source: { path: storagePath, steps: o.stepCount || 0, epochs: o.epochsDone || 0, params: m.paramCount(), vocab: o.vocabSize, config: o.config, exportedAt: o.createdAt ?? null }
-          });
-          if (e2) {
-            await admin.storage.from("nova-deploy-models").remove([storagePath]);
-            throw new HttpErr(500, "db", e2.message);
-          }
-        } catch (e) { throw e; }
+        // Keep registration lightweight. Supabase Edge Functions have a strict memory ceiling,
+        // so constructing/testing a full model here can kill the function for real exports.
+        // The private artifact remains in Storage and is loaded by the inference runtime when used.
+        const head = compressed.subarray(0, 2);
+        if (head[0] !== 0x1f || head[1] !== 0x8b)
+          throw new HttpErr(400, "bad_upload", "The uploaded model is not a valid gzip export.");
+        const { error: e2 } = await admin.from("deploy_models").insert({
+          id, owner: uid, name, version: "1.0.0",
+          sha: await sha256(String.fromCharCode(...compressed.subarray(0, Math.min(compressed.byteLength, 1024)))),
+          settings: cleanSettings(b.settings),
+          source: { path: storagePath, bytes: compressed.byteLength }
+        });
+        if (e2) {
+          await admin.storage.from("nova-deploy-models").remove([storagePath]);
+          throw new HttpErr(500, "db", e2.message);
+        }
         return json({ id });
       }
       case "update_model": {
