@@ -29,18 +29,16 @@ Deno.serve(async (req) => {
     const b = await req.json(); const uid = user.id;
 
     switch (b.action) {
-      case "register_model": {   // create + deploy: needs a subscription
+      case "register_model": {
         await requireAccess(uid);
         const id = String(b.id ?? ""); if (!/^mdl_[0-9a-f]{10}$/.test(id)) throw new HttpErr(400, "bad_id", "Bad model id.");
         const name = String(b.name ?? "").trim().slice(0, 40); if (!name) throw new HttpErr(400, "bad_name", "Give your AI a name.");
-        const rawUrl = String(b.source?.url ?? "");
-        let u: URL;
-        try { u = new URL(rawUrl); } catch { throw new HttpErr(400, "bad_source", "Model storage URL is invalid."); }
-        if (u.protocol !== "https:" || u.hostname !== "swift.subnp.com" || !u.pathname.startsWith("/files/"))
-          throw new HttpErr(400, "bad_source", "Model must be stored on the approved SwiftCDN file endpoint.");
-        const r = await fetch(u.toString(), { redirect: "error", headers: { "Accept": "application/gzip,application/octet-stream,*/*" } });
-        if (!r.ok || !r.body) throw new HttpErr(400, "no_upload", "The model file could not be downloaded from SwiftCDN.");
-        const compressed = new Uint8Array(await new Response(r.body).arrayBuffer());
+        const storagePath = String(b.source?.path ?? "");
+        if (!/^[0-9a-f]{8}-[0-9a-f-]{27}\/mdl_[0-9a-f]{10}\.json\.gz$/.test(storagePath) || !storagePath.startsWith(uid + "/"))
+          throw new HttpErr(400, "bad_source", "Model must be stored in your private Supabase Storage folder.");
+        const { data: object, error: objectError } = await admin.storage.from("nova-deploy-models").download(storagePath);
+        if (objectError || !object) throw new HttpErr(400, "no_upload", "The model file could not be downloaded from Supabase Storage.");
+        const compressed = new Uint8Array(await object.arrayBuffer());
         if (compressed.byteLength > 250 * 1024 * 1024) throw new HttpErr(413, "model_too_large", "Model file is too large.");
         try {
           const text = new TextDecoder().decode(await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
@@ -50,9 +48,12 @@ Deno.serve(async (req) => {
           const { error: e2 } = await admin.from("deploy_models").insert({
             id, owner: uid, name, version: "1.0." + (o.stepCount || 0), sha: await sha256(text),
             settings: cleanSettings(b.settings),
-            source: { url: u.toString(), steps: o.stepCount || 0, epochs: o.epochsDone || 0, params: m.paramCount(), vocab: o.vocabSize, config: o.config, exportedAt: o.createdAt ?? null }
+            source: { path: storagePath, steps: o.stepCount || 0, epochs: o.epochsDone || 0, params: m.paramCount(), vocab: o.vocabSize, config: o.config, exportedAt: o.createdAt ?? null }
           });
-          if (e2) throw new HttpErr(500, "db", e2.message);
+          if (e2) {
+            await admin.storage.from("nova-deploy-models").remove([storagePath]);
+            throw new HttpErr(500, "db", e2.message);
+          }
         } catch (e) { throw e; }
         return json({ id });
       }
