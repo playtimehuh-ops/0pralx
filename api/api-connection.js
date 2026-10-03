@@ -124,7 +124,7 @@ export default async function handler(req, res) {
       const t=BPETokenizer.fromJSON(o.tokenizer),m=new NovaModel(o.vocabSize,o.config),d=m.cfg.dModel;
       if(t.size!==o.vocabSize||o.weights.wte?.length!==o.vocabSize*d||o.weights.wpe?.length!==m.cfg.ctxLen*d||o.weights.layers?.length!==m.cfg.nLayers)throw new Error("weight_shapes");
       m.loadWeights(o.weights);m.eosId=t.vocab["<EOS>"];
-      const ids=t.encode(prep.prompt),t0=performance.now(),out=m.generate(ids,prep.maxTok,prep.temp,prep.settings?.topK||30,prep.settings?.topP||.9,{stop:false}),ms=Math.round(performance.now()-t0);
+      const ids=t.encode(prep.prompt),t0=performance.now(),out=m.generateFast(ids,prep.maxTok,prep.temp,prep.settings?.topK||30,prep.settings?.topP||.9,{stop:false}),ms=Math.round(performance.now()-t0);
       let reply=t.decode(out.slice(ids.length)),cut=reply.indexOf("\nUser:");if(cut>=0)reply=reply.slice(0,cut);
       const outTok=out.length-ids.length,actual=ids.length*prep.creditsIn+outTok*prep.creditsOut;
       const settled=await runtime({action:"settle",alloc:prep.alloc,reserve:prep.reserve,actual,modelId:prep.modelId,inputTokens:ids.length,outputTokens:outTok,ms});
