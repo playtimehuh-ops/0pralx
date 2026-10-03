@@ -66,7 +66,7 @@ export default async function handler(req, res) {
   const chatMode = req.headers["x-nova-chat"] === "1";
   const auth = String(req.headers.authorization || "");
   if (chatMode) {
-    if (!/^Bearer\\s+eyJ[A-Za-z0-9_-]+\\./.test(auth)) { reject(res,401,"unauthenticated","Sign in first."); return; }
+    if (!/^Bearer\s+eyJ[A-Za-z0-9_-]+\./.test(auth)) { reject(res,401,"unauthenticated","Sign in first."); return; }
   }
   const keyMatch = chatMode ? null : /^Bearer (nova_sk_[A-Za-z0-9_-]{20,128})$/.exec(auth);
   if (!chatMode && !keyMatch) {
