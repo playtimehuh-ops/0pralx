@@ -68,7 +68,9 @@ Deno.serve(async (req) => {
       }
       case "delete_model": {
         const m = await ownModel(uid, b.id);
-        await admin.storage.from("deploy_models").remove([`${uid}/${m.id}.json`]); await admin.from("deploy_models").delete().eq("id", m.id);
+        const storedPath = String(m.source?.path ?? "");
+        if (storedPath && storedPath.startsWith(uid + "/")) await admin.storage.from("nova-deploy-models").remove([storedPath]);
+        await admin.from("deploy_models").delete().eq("id", m.id);
         return json({ ok: true });
       }
       case "chat":   // playground: runs the real model on the server, same credits as the API
