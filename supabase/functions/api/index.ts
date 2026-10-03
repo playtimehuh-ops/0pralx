@@ -2,7 +2,7 @@
 // Secrets: STRIPE_SECRET_KEY, SITE_URL (exact https URL of the page)
 import Stripe from "npm:stripe@17";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { admin, buildModel, config, HttpErr, runChat, sha256 } from "../_shared/run.ts";
+import { admin, buildModel, config, HttpErr, runChat, sha256 } from "./_shared/run.ts";
 
 const getStripe = () => { const key = Deno.env.get("STRIPE_SECRET_KEY"); if (!key?.trim()) throw new HttpErr(503, "stripe_not_configured", "Stripe is not configured. Add STRIPE_SECRET_KEY to the Supabase Edge Function secrets."); return new Stripe(key, { httpClient: Stripe.createFetchHttpClient() }); };
 const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type" };
