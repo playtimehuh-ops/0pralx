@@ -64,7 +64,13 @@ Deno.serve(async (req) => {
           id, owner: uid, name, version: "1.0.0",
           sha: await sha256(String.fromCharCode(...compressed.subarray(0, Math.min(compressed.byteLength, 1024)))),
           settings: cleanSettings(b.settings),
-          source: { path: storagePath, bytes: compressed.byteLength }
+          source: {
+            path: storagePath,
+            bytes: compressed.byteLength,
+            params: Math.max(0, Number(b.source?.params) || 0),
+            steps: Math.max(0, Number(b.source?.steps) || 0),
+            epochs: Math.max(0, Number(b.source?.epochs) || 0)
+          }
         });
         if (e2) {
           await admin.storage.from("nova-deploy-models").remove([storagePath]);
