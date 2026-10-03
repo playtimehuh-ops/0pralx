@@ -374,6 +374,124 @@ class NovaModel {
     return ids;
   }
 
+  generateFast(promptIds, maxTokens, temperature, topK, topP, stopFlag) {
+    this.useParams();
+    const d = this.cfg.dModel, H = this.cfg.nHeads, hd = d / H, ctx = this.cfg.ctxLen;
+    const ids = promptIds.slice(-ctx);
+    const caches = this.layers.map(() => ({ k: [], v: [] }));
+
+    const lnOne = (x, gamma, beta) => {
+      let mean = 0;
+      for (let i = 0; i < d; i++) mean += x[i];
+      mean /= d;
+      let vr = 0;
+      for (let i = 0; i < d; i++) { const z = x[i] - mean; vr += z * z; }
+      const inv = 1 / Math.sqrt(vr / d + 1e-5);
+      const y = new Float32Array(d);
+      for (let i = 0; i < d; i++) y[i] = (x[i] - mean) * inv * gamma.data[i] + beta.data[i];
+      return y;
+    };
+    const linearOne = (x, layer) => {
+      const n = layer.W.cols, y = new Float32Array(n);
+      for (let j = 0; j < n; j++) {
+        let s = layer.b.data[j];
+        for (let i = 0; i < x.length; i++) s += x[i] * layer.W.data[i * n + j];
+        y[j] = s;
+      }
+      return y;
+    };
+    const step = (tokenId, pos) => {
+      let x = new Float32Array(d);
+      const to = tokenId * d, po = pos * d;
+      for (let i = 0; i < d; i++) x[i] = this.wte.data[to + i] + this.wpe.data[po + i];
+
+      for (let li = 0; li < this.layers.length; li++) {
+        const layer = this.layers[li], c = caches[li];
+        const xn = lnOne(x, layer.ln1.gamma, layer.ln1.beta);
+        const q = linearOne(xn, layer.wq), k = linearOne(xn, layer.wk), v = linearOne(xn, layer.wv);
+        c.k.push(k); c.v.push(v);
+        if (c.k.length > ctx) { c.k.shift(); c.v.shift(); }
+
+        const attn = new Float32Array(d);
+        const scale = 1 / Math.sqrt(hd);
+        for (let h = 0; h < H; h++) {
+          const scores = new Float32Array(c.k.length);
+          let mx = -Infinity;
+          for (let j = 0; j < c.k.length; j++) {
+            let s = 0, qo = h * hd, ko = h * hd;
+            for (let z = 0; z < hd; z++) s += q[qo + z] * c.k[j][ko + z];
+            s *= scale; scores[j] = s; if (s > mx) mx = s;
+          }
+          let sum = 0;
+          for (let j = 0; j < scores.length; j++) { scores[j] = Math.exp(scores[j] - mx); sum += scores[j]; }
+          const inv = 1 / (sum || 1);
+          const ao = h * hd;
+          for (let j = 0; j < c.v.length; j++) {
+            const w = scores[j] * inv, vv = c.v[j];
+            for (let z = 0; z < hd; z++) attn[ao + z] += w * vv[ao + z];
+          }
+        }
+
+        const y = linearOne(attn, layer.wo);
+        const x2 = new Float32Array(d);
+        for (let i = 0; i < d; i++) x2[i] = x[i] + y[i];
+        const x2n = lnOne(x2, layer.ln2.gamma, layer.ln2.beta);
+        const ff1 = linearOne(x2n, layer.w1);
+        for (let i = 0; i < ff1.length; i++) if (ff1[i] < 0) ff1[i] = 0;
+        const ff2 = linearOne(ff1, layer.w2);
+        for (let i = 0; i < d; i++) x[i] = x2[i] + ff2[i];
+      }
+
+      const xf = lnOne(x, this.lnf.gamma, this.lnf.beta);
+      const logits = new Float32Array(this.vocabSize);
+      for (let token = 0; token < this.vocabSize; token++) {
+        const off = token * d;
+        let s = 0;
+        for (let i = 0; i < d; i++) s += xf[i] * this.wte.data[off + i];
+        logits[token] = s;
+      }
+      return logits;
+    };
+
+    // Prefill the prompt once. Rebuilding only when the sliding context is full keeps
+    // positional embeddings aligned with the original full-forward implementation.
+    for (let i = 0; i < ids.length; i++) step(ids[i], i);
+
+    const temp = Math.max(temperature, 1e-6);
+    for (let generated = 0; generated < maxTokens; generated++) {
+      if (stopFlag && stopFlag.stop) break;
+      const pos = Math.min(ctx - 1, ids.length);
+      const logits = step(ids[ids.length - 1], pos);
+      const scaled = new Float32Array(this.vocabSize);
+      for (let j = 0; j < this.vocabSize; j++) scaled[j] = logits[j] / temp;
+      const probs = new Float32Array(this.vocabSize);
+      softmaxRow(scaled, probs, 0, this.vocabSize);
+      let idxs = Array.from({ length: this.vocabSize }, (_, i) => i).sort((a, b) => probs[b] - probs[a]);
+      if (topK && topK > 0) idxs = idxs.slice(0, topK);
+      if (topP && topP < 1) {
+        let cum = 0; const kept = [];
+        for (const i of idxs) { cum += probs[i]; kept.push(i); if (cum >= topP) break; }
+        idxs = kept;
+      }
+      let sum = 0;
+      for (const i of idxs) sum += probs[i];
+      let r = Math.random() * sum, chosen = idxs[idxs.length - 1];
+      for (const i of idxs) { r -= probs[i]; if (r <= 0) { chosen = i; break; } }
+      ids.push(chosen);
+      if (this.eosId !== undefined && chosen === this.eosId) break;
+
+      // Once the context is full, rebuild the cache from the current window so the
+      // positional embeddings and causal window remain consistent.
+      if (ids.length > ctx) {
+        const window = ids.slice(-ctx);
+        for (const c of caches) { c.k.length = 0; c.v.length = 0; }
+        for (let i = 0; i < window.length - 1; i++) step(window[i], i);
+        ids.splice(0, ids.length - window.length);
+      }
+    }
+    return ids;
+  }
+
   serializeWeights() {
     const out = {};
     out.wte = Array.from(this.wte.data);
