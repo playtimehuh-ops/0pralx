@@ -88,6 +88,40 @@ Deno.serve(async (req) => {
         await admin.from("deploy_models").delete().eq("id", m.id);
         return json({ ok: true });
       }
+      case "runtime_prepare": {
+        await requireAccess(uid);
+        const m = await ownModel(uid, b.modelId);
+        if (!m.deployed) throw new HttpErr(403, "not_deployed", "This model is not deployed.");
+        const msgs = b.messages;
+        if (!Array.isArray(msgs) || !msgs.length || msgs.length > 50 || msgs[msgs.length - 1]?.role !== "user" || msgs.some((x) => typeof x?.content !== "string" || (x.role !== "user" && x.role !== "assistant"))) throw new HttpErr(400, "bad_messages", "messages must be a list ending with a user message.");
+        const last = msgs[msgs.length - 1].content.trim().slice(0, 2000);
+        if (!last) throw new HttpErr(400, "bad_messages", "Empty message.");
+        const st = m.settings ?? {}, cfg = await config();
+        const maxTok = Math.max(1, Math.min(Number(b.maxTokens) || st.maxTok || 80, 300));
+        const temp = Math.max(0.1, Math.min(Number(b.temperature) || st.temp || 0.8, 2));
+        const prompt = msgs.slice(0, -1).slice(-6).map((x:any) => (x.role === "user" ? "User: " : "Nova: ") + x.content.slice(0, 2000)).join("\n") + "\nUser: " + last + "\nNova:";
+        const cin = Number(cfg.credits_per_input_token ?? 1), cout = Number(cfg.credits_per_output_token ?? 1);
+        const reserve = prompt.length * cin + maxTok * cout;
+        const { data: alloc } = await admin.rpc("deploy_reserve_credits", { p_user: uid, p_amount: reserve });
+        if (alloc == null) throw new HttpErr(402, "insufficient_credits", "Not enough credits for this request.");
+        const path = String(m.source?.path ?? "");
+        if (!path.startsWith(uid + "/") || !path.endsWith(".json.gz")) { await admin.rpc("deploy_release_credits", { p_alloc: alloc, p_amount: reserve }); throw new HttpErr(500, "weights_unavailable", "Model storage path is invalid."); }
+        const { data: signed, error: signError } = await admin.storage.from("nova-deploy-models").createSignedUrl(path, 600);
+        if (signError || !signed?.signedUrl) { await admin.rpc("deploy_release_credits", { p_alloc: alloc, p_amount: reserve }); throw new HttpErr(500, "weights_unavailable", "Model weights could not be signed for inference."); }
+        return json({ alloc, reserve, signedUrl: signed.signedUrl, sha: m.sha, settings: st, prompt, maxTok, temp, creditsIn: cin, creditsOut: cout });
+      }
+      case "runtime_settle": {
+        const alloc = String(b.alloc ?? ""), reserve = Number(b.reserve), actual = Number(b.actual);
+        if (!alloc || !Number.isFinite(reserve) || !Number.isFinite(actual) || reserve < 0 || actual < 0 || actual > reserve) throw new HttpErr(400, "bad_settlement", "Invalid runtime settlement.");
+        const { data: remaining } = await admin.rpc("deploy_settle_credits", { p_alloc: alloc, p_user: uid, p_reserved: reserve, p_actual: actual, p_model: String(b.modelId ?? ""), p_via: "playground", p_key: null, p_in: Math.max(0, Number(b.inputTokens) || 0), p_out: Math.max(0, Number(b.outputTokens) || 0), p_ms: Math.max(0, Number(b.ms) || 0) });
+        return json({ credits_remaining: remaining });
+      }
+      case "runtime_release": {
+        const alloc = String(b.alloc ?? ""), reserve = Number(b.reserve);
+        if (!alloc || !Number.isFinite(reserve) || reserve < 0) throw new HttpErr(400, "bad_release", "Invalid runtime release.");
+        await admin.rpc("deploy_release_credits", { p_alloc: alloc, p_amount: reserve });
+        return json({ ok: true });
+      }
       case "chat":   // playground: runs the real model on the server, same credits as the API
         return json(await runChat({ userId: uid, modelId: String(b.modelId ?? ""), messages: b.messages, via: "playground" }));
       case "create_api_key": {
