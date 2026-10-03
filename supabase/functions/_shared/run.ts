@@ -3,6 +3,28 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { NovaModel, BPETokenizer } from "./engine.js";
 
 export const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
+
+export const securityHeaders = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
+  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
+  "Cache-Control": "no-store",
+};
+
+const rateBuckets = new Map<string, { start: number; count: number }>();
+export function enforceRateLimit(key: string, limit = 30, windowMs = 60_000) {
+  const now = Date.now();
+  const cur = rateBuckets.get(key);
+  if (!cur || now - cur.start >= windowMs) {
+    rateBuckets.set(key, { start: now, count: 1 });
+    if (rateBuckets.size > 5000) rateBuckets.delete(rateBuckets.keys().next().value!);
+    return;
+  }
+  cur.count++;
+  if (cur.count > limit) throw new HttpErr(429, "rate_limited", "Too many requests. Try again later.");
+}
 export class HttpErr extends Error { constructor(public status: number, public code: string, msg: string) { super(msg); } }
 
 export async function sha256(s: string) {
