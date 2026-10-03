@@ -70,8 +70,7 @@ td{padding:9px 8px;border-bottom:1px solid #f0f0f2;vertical-align:top}tr.row-cli
 <section class="panel"><div class="crumb"><span id="crumb">Leaderboard</span></div>
 <div id="banner" class="banner hide"></div><div id="payMsg" class="small" style="padding:10px 24px 0"></div>
 <div class="content">
-<section class="tab on" id="t-board"><div class="card hide" id="sbSetup"><h2>Connect Supabase</h2><p class="small">Run <code>supabase-setup.sql</code>, deploy the functions, then paste the Project URL and the <b>anon</b> public key (Project Settings → API). Never paste the service-role key.</p>
-<div class="row"><div><label>Project URL</label><input id="sbUrl" placeholder="https://xxxx.supabase.co"></div><div><label>Anon key</label><input id="sbKey" placeholder="eyJ…"></div></div><button class="btn" id="sbSave">Save &amp; connect</button><div class="err" id="sbMsg"></div></div>
+<section class="tab on" id="t-board">
 <h2>AI model leaderboard</h2><p class="small">Public rankings of deployed models by replies served. Rankings are for discovery only: nobody can run another creator's model from here.</p><div id="boardBox"></div></section>
 <section class="tab" id="t-models"><div id="mList"></div></section>
 <section class="tab" id="t-create"><div class="card"><h2>1 · Import your trained model</h2><p class="small">Choose <code>nova-model.json</code> or <code>nova-full-backup.json</code> from the Nova training site. Only the trained weights and tokenizer are used. The server validates them and runs the model on its own hardware.</p>
@@ -95,7 +94,7 @@ const ST={active:'Active',past_due:'Past due',cancelled:'Cancelled',expired:'Exp
 const TITLES={board:'Leaderboard',models:'My models',create:'Create & deploy',test:'Test',keys:'API keys',billing:'Billing'};
 const PROTECTED=['models','create','test','keys','billing'];
 let sb=null,SBURL='',S=null,A=null,models=[],pending=null,chatMsgs=[],cur='board';
-function initSB(){let c={};try{c=JSON.parse(localStorage.getItem('novaSB')||'{}')}catch(e){}const url=SBCFG.url||c.url,key=SBCFG.key||c.key;
+function initSB(){const url=SBCFG.url,key=SBCFG.key;
  if(!url||!key||!window.supabase)return false;SBURL=url;sb=window.supabase.createClient(url,key,{auth:{persistSession:true}});return true}
 const q=async p=>{const{data,error}=await p;if(error)throw Error(error.message);return data};
 async function call(action,body={}){const r=await sb.functions.invoke('api',{body:{action,...body}});
@@ -207,7 +206,6 @@ async function loadBilling(){await refreshAcct();const h=await q(sb.from('deploy
  const go=(id,f)=>$(id)&&($(id).onclick=async()=>{try{await f();loadBilling()}catch(x){$('#bErr').textContent=x.message}});
  go('#bSub',subscribe);go('#bOff',()=>call('set_renewal',{on:false}));go('#bOn',()=>call('set_renewal',{on:true}))}
 /* ---- setup + boot ---- */
-$('#sbSave').onclick=()=>{const url=$('#sbUrl').value.trim().replace(/\/+$/,''),key=$('#sbKey').value.trim();if(!/^https:\/\/.+/.test(url)||key.length<20){$('#sbMsg').textContent='Enter the project URL (https://….supabase.co) and the anon key';return}localStorage.setItem('novaSB',JSON.stringify({url,key}));location.reload()};
 (async()=>{const P=new URLSearchParams(location.search);if(P.get('paid')){try{sessionStorage.setItem('novaPaid','1')}catch(e){}}if(P.has('paid')||P.has('canceled'))history.replaceState(null,'',location.pathname);
  if(!initSB()){tab('board');return}
  try{const{data}=await sb.auth.getSession();if(data.session)await onSession(data.session.user)}catch(e){}
