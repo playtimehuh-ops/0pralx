@@ -125,7 +125,7 @@ async function refreshAcct(){A=S?await q(sb.rpc('deploy_my_account')):null;
  $('#miniSub').innerHTML=A?`<div>${badge(A.status)}</div><div class="small" style="margin:4px 0">${nf(A.remaining)} credits left</div>`:'';drawBanner()}
 function drawBanner(){const el=$('#banner');if(!S||!A||A.access||cur==='board'){el.classList.add('hide');return}
  el.classList.remove('hide');el.innerHTML=`<b>Subscription required.</b> ${A.status==='expired'?'Your subscription expired on '+fd(A.period_end)+'. ':''}Creating, testing, deploying and the API are locked until you subscribe. <button class="btn" id="bSubNow">${A.status==='expired'?'Renew':'Subscribe'} · ${money()}</button>`;$('#bSubNow').onclick=()=>subscribe().catch(fail)}
-async function subscribe(){if(!S)return authDlg();const r=await call('checkout');location.href=r.url}   // Stripe-hosted checkout
+async function subscribe(){if(!S)return authDlg();try{const r=await call('checkout');if(!r?.url)throw Error('Checkout session was not created.');location.href=r.url}catch(e){alert(e?.message||'Could not start checkout. Check the Stripe configuration.')}}   // Stripe-hosted checkout
 async function afterPay(){let f=null;try{f=sessionStorage.getItem('novaPaid');sessionStorage.removeItem('novaPaid')}catch(e){}if(!f)return;
  const el=$('#payMsg');el.textContent='Payment received. Waiting for Stripe to confirm…';
  for(let i=0;i<12;i++){await refreshAcct();if(A&&A.access){el.textContent='Subscription active: '+nf(A.remaining)+' credits ready.';setTimeout(()=>el.textContent='',8000);return tab('billing')}await new Promise(r=>setTimeout(r,2000))}
