@@ -327,7 +327,8 @@ async function loadBilling(){await refreshAcct();const h=await q(sb.from('deploy
  try{const{data}=await sb.auth.getSession();if(data.session)await onSession(data.session.user)}catch(e){}
  tab(S&&sessionStorage.getItem('novaPaid')?'billing':'board')})();
 
-</script><div id="legalOverlay" class="modal" style="display:none"><div class="modal-card" style="max-width:820px;max-height:82vh;overflow:auto"><div style="display:flex;justify-content:space-between;gap:16px;align-items:center"><h2 id="legalTitle" style="margin:0">Legal</h2><button class="btn sec" id="legalClose">Close</button></div><div id="legalBody" class="small" style="margin-top:18px;line-height:1.65"></div></div></div>
+</script>
+<div id="legalOverlay" class="modal" style="display:none"><div class="modal-card" style="max-width:820px;max-height:82vh;overflow:auto"><div style="display:flex;justify-content:space-between;gap:16px;align-items:center"><h2 id="legalTitle" style="margin:0">Legal</h2><button class="btn sec" id="legalClose">Close</button></div><div id="legalBody" class="small" style="margin-top:18px;line-height:1.65"></div></div></div>
 <footer style="padding:28px 24px;border-top:1px solid var(--line);margin-top:40px;display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-size:12px"><a href="#" data-legal="terms">Terms of Service</a><a href="#" data-legal="privacy">Privacy Policy</a><a href="#" data-legal="refund">Refund & Payment Policy</a><a href="#" data-legal="acceptable">Acceptable Use</a></footer>
 <script>
 (function(){
@@ -368,5 +369,4 @@ async function loadBilling(){await refreshAcct();const h=await q(sb.from('deploy
  document.getElementById('legalClose').onclick=()=>ov.style.display='none';
  ov.addEventListener('click',e=>{if(e.target===ov)ov.style.display='none'});
 })();
-</script>
-</body></html>
+</script></body></html>
