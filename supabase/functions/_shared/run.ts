@@ -57,9 +57,9 @@ const cache = new Map<string, { sha: string; m: any; t: any }>();
 export async function loadModel(row: { id: string; owner: string; sha: string }) {
   const hit = cache.get(row.id);
   if (hit && hit.sha === row.sha) return hit;
-  const { data, error } = await admin.storage.from("deploy_models").download(`${row.owner}/${row.id}.json`);
+  const { data, error } = await admin.storage.from("nova-deploy-models").download(`${row.owner}/${row.id}.json.gz`);
   if (error || !data) throw new HttpErr(500, "weights_unavailable", "Model weights could not be loaded");
-  const text = await data.text();
+  const text = new TextDecoder().decode(await new Response(data.stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
   if (await sha256(text) !== row.sha) throw new HttpErr(500, "integrity", "Stored weights failed the integrity check");
   const e = { sha: row.sha, ...buildModel(JSON.parse(text)) };
   cache.set(row.id, e); if (cache.size > 3) cache.delete(cache.keys().next().value!);
