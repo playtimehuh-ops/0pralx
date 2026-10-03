@@ -136,7 +136,7 @@ function tab(t){if(PROTECTED.includes(t)&&!S)return authDlg();cur=t;
  $('#crumb').textContent=TITLES[t];drawBanner();({board:loadBoard,models:loadModels,create:drawCreate,test:drawTest,keys:loadKeys,billing:loadBilling})[t]().catch(fail)}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.t)};
 /* ---- leaderboard: public data only; there is no run/test path for other people's models ---- */
-async function loadBoard(){$('#sbSetup').classList.toggle('hide',!!sb);if(!sb){$('#boardBox').innerHTML='';return}
+async function loadBoard(){if(!sb){$('#boardBox').innerHTML='';return}
  const rows=await q(sb.rpc('deploy_leaderboard',{p_limit:50}));
  $('#boardBox').innerHTML=rows.length?`<div class="wrapx"><table><tr><th>#</th><th>Model</th><th>Creator</th><th>Version</th><th class="num">Replies</th><th class="num">Avg latency</th><th class="num">Training steps</th><th class="num">Parameters</th></tr>${rows.map(r=>`<tr class="row-click" data-id="${esc(r.model_id)}"><td>${r.rank}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.creator)}</td><td class="mono">${esc(r.version)}</td><td class="num">${nf(r.replies)}</td><td class="num">${r.avg_ms==null?'—':r.avg_ms+' ms'}</td><td class="num">${r.steps==null?'—':nf(r.steps)}</td><td class="num">${r.params==null?'—':nf(r.params)}</td></tr>`).join('')}</table></div>`:'<div class="card small">No public models yet.</div>'}
 $('#boardBox').onclick=safe(async e=>{const tr=e.target.closest('tr[data-id]');if(!tr)return;const m=await q(sb.rpc('deploy_public_model_info',{p_id:tr.dataset.id}));if(!m)return;
