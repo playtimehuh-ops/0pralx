@@ -394,9 +394,9 @@ class NovaModel {
     const linearOne = (x, layer) => {
       const n = layer.W.cols, y = new Float32Array(n);
       for (let j = 0; j < n; j++) {
-        let s = layer.b.data[j];
-        for (let i = 0; i < x.length; i++) s += x[i] * layer.W.data[i * n + j];
-        y[j] = s;
+        let sum = layer.b.data[j];
+        for (let i = 0; i < x.length; i++) sum += x[i] * layer.W.data[i * n + j];
+        y[j] = sum;
       }
       return y;
     };
@@ -412,28 +412,25 @@ class NovaModel {
         c.k.push(k); c.v.push(v);
         if (c.k.length > ctx) { c.k.shift(); c.v.shift(); }
 
-        const attn = new Float32Array(d);
-        const scale = 1 / Math.sqrt(hd);
+        const attn = new Float32Array(d), scale = 1 / Math.sqrt(hd);
         for (let h = 0; h < H; h++) {
           const scores = new Float32Array(c.k.length);
           let mx = -Infinity;
           for (let j = 0; j < c.k.length; j++) {
-            let s = 0, qo = h * hd, ko = h * hd;
-            for (let z = 0; z < hd; z++) s += q[qo + z] * c.k[j][ko + z];
-            s *= scale; scores[j] = s; if (s > mx) mx = s;
+            let score = 0, off = h * hd;
+            for (let z = 0; z < hd; z++) score += q[off + z] * c.k[j][off + z];
+            score *= scale; scores[j] = score; if (score > mx) mx = score;
           }
           let sum = 0;
           for (let j = 0; j < scores.length; j++) { scores[j] = Math.exp(scores[j] - mx); sum += scores[j]; }
-          const inv = 1 / (sum || 1);
-          const ao = h * hd;
+          const inv = 1 / (sum || 1), ao = h * hd;
           for (let j = 0; j < c.v.length; j++) {
             const w = scores[j] * inv, vv = c.v[j];
             for (let z = 0; z < hd; z++) attn[ao + z] += w * vv[ao + z];
           }
         }
 
-        const y = linearOne(attn, layer.wo);
-        const x2 = new Float32Array(d);
+        const y = linearOne(attn, layer.wo), x2 = new Float32Array(d);
         for (let i = 0; i < d; i++) x2[i] = x[i] + y[i];
         const x2n = lnOne(x2, layer.ln2.gamma, layer.ln2.beta);
         const ff1 = linearOne(x2n, layer.w1);
@@ -446,26 +443,25 @@ class NovaModel {
       const logits = new Float32Array(this.vocabSize);
       for (let token = 0; token < this.vocabSize; token++) {
         const off = token * d;
-        let s = 0;
-        for (let i = 0; i < d; i++) s += xf[i] * this.wte.data[off + i];
-        logits[token] = s;
+        let sum = 0;
+        for (let i = 0; i < d; i++) sum += xf[i] * this.wte.data[off + i];
+        logits[token] = sum;
       }
       return logits;
     };
 
-    // Prefill the prompt once. Rebuilding only when the sliding context is full keeps
-    // positional embeddings aligned with the original full-forward implementation.
-    for (let i = 0; i < ids.length; i++) step(ids[i], i);
+    let logits = new Float32Array(this.vocabSize);
+    for (let i = 0; i < ids.length; i++) logits = step(ids[i], i);
 
     const temp = Math.max(temperature, 1e-6);
     for (let generated = 0; generated < maxTokens; generated++) {
       if (stopFlag && stopFlag.stop) break;
-      const pos = Math.min(ctx - 1, ids.length);
-      const logits = step(ids[ids.length - 1], pos);
+
       const scaled = new Float32Array(this.vocabSize);
       for (let j = 0; j < this.vocabSize; j++) scaled[j] = logits[j] / temp;
       const probs = new Float32Array(this.vocabSize);
       softmaxRow(scaled, probs, 0, this.vocabSize);
+
       let idxs = Array.from({ length: this.vocabSize }, (_, i) => i).sort((a, b) => probs[b] - probs[a]);
       if (topK && topK > 0) idxs = idxs.slice(0, topK);
       if (topP && topP < 1) {
@@ -477,16 +473,18 @@ class NovaModel {
       for (const i of idxs) sum += probs[i];
       let r = Math.random() * sum, chosen = idxs[idxs.length - 1];
       for (const i of idxs) { r -= probs[i]; if (r <= 0) { chosen = i; break; } }
+
       ids.push(chosen);
       if (this.eosId !== undefined && chosen === this.eosId) break;
 
-      // Once the context is full, rebuild the cache from the current window so the
-      // positional embeddings and causal window remain consistent.
       if (ids.length > ctx) {
         const window = ids.slice(-ctx);
         for (const c of caches) { c.k.length = 0; c.v.length = 0; }
-        for (let i = 0; i < window.length - 1; i++) step(window[i], i);
+        logits = new Float32Array(this.vocabSize);
+        for (let i = 0; i < window.length; i++) logits = step(window[i], i);
         ids.splice(0, ids.length - window.length);
+      } else {
+        logits = step(chosen, ids.length - 1);
       }
     }
     return ids;
