@@ -58,7 +58,7 @@ export async function loadModel(row: { id: string; owner: string; sha: string; s
   const hit = cache.get(row.id);
   if (hit && hit.sha === row.sha) return hit;
   const path = String(row.source?.path ?? "");
-  if (!path || !path.startsWith(row.owner + "/") || !/^[0-9a-f-]{36}\\/mdl_[0-9a-f]{10}\\.json\\.gz$/.test(path))
+  if (!path || !path.startsWith(row.owner + "/") || !path.endsWith(".json.gz"))
     throw new HttpErr(500, "weights_unavailable", "Model storage path is invalid");
   const { data: object, error } = await admin.storage.from("nova-deploy-models").download(path);
   if (error || !object) throw new HttpErr(500, "weights_unavailable", "Model weights could not be loaded");
