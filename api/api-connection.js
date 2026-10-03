@@ -61,14 +61,18 @@ export default async function handler(req, res) {
   }
 
   // Firewall 3: exact API-key gateway. Anonymous requests never reach the upstream.
+  const chatMode = req.headers["x-nova-chat"] === "1";
   const auth = String(req.headers.authorization || "");
-  const keyMatch = /^Bearer (nova_sk_[A-Za-z0-9_-]{20,128})$/.exec(auth);
+  if (chatMode) {
+    if (!/^Bearer\\s+eyJ[A-Za-z0-9_-]+\\./.test(auth)) { reject(res,401,"unauthenticated","Sign in first."); return; }
+  }
+  const keyMatch = chatMode ? null : /^Bearer (nova_sk_[A-Za-z0-9_-]{20,128})$/.exec(auth);
   if (!keyMatch) {
     reject(res, 401, "invalid_api_key", "Missing or malformed API key.");
     return;
   }
 
-  const key = keyMatch[1];
+  const key = keyMatch ? keyMatch[1] : "";
   if (!limit("key:" + key.slice(0, 32), KEY_LIMIT) || !limit("key-burst:" + key.slice(0, 32), KEY_BURST, BURST_WINDOW_MS)) {
     reject(res, 429, "rate_limited", "Too many requests. Try again later.");
     return;
@@ -92,6 +96,42 @@ export default async function handler(req, res) {
   const serialized = JSON.stringify(body);
   if (Buffer.byteLength(serialized, "utf8") > MAX_BODY_BYTES) {
     reject(res, 413, "payload_too_large", "Request body is too large.");
+    return;
+  }
+
+  if (chatMode && body.action === "chat") {
+    const runtime = async (payload) => {
+      const rr = await fetch("https://jtstdajaaasucialvsfs.supabase.co/functions/v1/runtime", {
+        method:"POST", headers:{"Authorization":auth,"Content-Type":"application/json"}, body:JSON.stringify(payload)
+      });
+      const dd = await rr.json().catch(()=>({error:"Runtime returned invalid JSON."}));
+      if(!rr.ok){const x=new Error(dd.error||"Runtime request failed.");x.code=dd.code;throw x;}
+      return dd;
+    };
+    let prep;
+    try { prep=await runtime({action:"prepare",modelId:String(body.modelId||""),messages:body.messages,maxTokens:body.maxTokens,temperature:body.temperature}); }
+    catch(x){ reject(res,x.code==="subscription_required"?402:400,x.code||"runtime_error",x.message); return; }
+    try {
+      const r=await fetch(prep.signedUrl,{cache:"no-store"});
+      if(!r.ok)throw new Error("weights_download_failed");
+      const compressed=new Uint8Array(await r.arrayBuffer());
+      const digest=[...new Uint8Array(await crypto.subtle.digest("SHA-256",compressed))].map(b=>b.toString(16).padStart(2,"0")).join("");
+      if(digest!==prep.sha)throw new Error("integrity");
+      const raw=await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
+      const o=JSON.parse(new TextDecoder().decode(raw));
+      const t=BPETokenizer.fromJSON(o.tokenizer),m=new NovaModel(o.vocabSize,o.config),d=m.cfg.dModel;
+      if(t.size!==o.vocabSize||o.weights.wte?.length!==o.vocabSize*d||o.weights.wpe?.length!==m.cfg.ctxLen*d||o.weights.layers?.length!==m.cfg.nLayers)throw new Error("weight_shapes");
+      m.loadWeights(o.weights);m.eosId=t.vocab["<EOS>"];
+      const ids=t.encode(prep.prompt),t0=performance.now(),out=m.generate(ids,prep.maxTok,prep.temp,prep.settings?.topK||30,prep.settings?.topP||.9,{stop:false}),ms=Math.round(performance.now()-t0);
+      let reply=t.decode(out.slice(ids.length)),cut=reply.indexOf("\nUser:");if(cut>=0)reply=reply.slice(0,cut);
+      const outTok=out.length-ids.length,actual=ids.length*prep.creditsIn+outTok*prep.creditsOut;
+      const settled=await runtime({action:"settle",alloc:prep.alloc,reserve:prep.reserve,actual,modelId:prep.modelId,inputTokens:ids.length,outputTokens:outTok,ms});
+      res.status(200).send(JSON.stringify({reply:reply.trim()||"(empty output)",usage:{prompt_tokens:ids.length,completion_tokens:outTok,credits_used:Math.min(actual,prep.reserve),credits_remaining:settled.credits_remaining}}));
+    } catch(x) {
+      try{await runtime({action:"release",alloc:prep.alloc,reserve:prep.reserve});}catch{}
+      const msg=x.message==="integrity"?"Stored model failed its integrity check.":x.message==="weights_download_failed"?"Model weights could not be downloaded.":x.message==="weight_shapes"?"This model export is invalid.":"Model execution failed.";
+      reject(res,500,"execution_failed",msg);
+    }
     return;
   }
 
