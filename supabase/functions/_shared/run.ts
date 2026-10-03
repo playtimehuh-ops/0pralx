@@ -54,12 +54,16 @@ export function buildModel(o: any) {
 }
 
 const cache = new Map<string, { sha: string; m: any; t: any }>();
-export async function loadModel(row: { id: string; owner: string; sha: string }) {
+export async function loadModel(row: { id: string; owner: string; sha: string; source?: any }) {
   const hit = cache.get(row.id);
   if (hit && hit.sha === row.sha) return hit;
-  const { data, error } = await admin.storage.from("nova-deploy-models").download(`${row.owner}/${row.id}.json.gz`);
-  if (error || !data) throw new HttpErr(500, "weights_unavailable", "Model weights could not be loaded");
-  const text = new TextDecoder().decode(await new Response(data.stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
+  const url = String(row.source?.url ?? "");
+  let u: URL;
+  try { u = new URL(url); } catch { throw new HttpErr(500, "weights_unavailable", "Model storage URL is invalid"); }
+  if (u.protocol !== "https:" || u.hostname !== "swift.subnp.com") throw new HttpErr(500, "weights_unavailable", "Model storage URL is not allowed");
+  const r = await fetch(u.toString(), { redirect: "error", headers: { "Accept": "application/gzip,application/octet-stream,*/*" } });
+  if (!r.ok || !r.body) throw new HttpErr(500, "weights_unavailable", "Model weights could not be loaded");
+  const text = new TextDecoder().decode(await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
   if (await sha256(text) !== row.sha) throw new HttpErr(500, "integrity", "Stored weights failed the integrity check");
   const e = { sha: row.sha, ...buildModel(JSON.parse(text)) };
   cache.set(row.id, e); if (cache.size > 3) cache.delete(cache.keys().next().value!);
@@ -71,7 +75,7 @@ type Msg = { role: string; content: string };
 export async function runChat(a: { userId: string; modelId: string; messages: Msg[]; maxTokens?: number; temperature?: number; via: "playground" | "api"; keyId?: string }) {
   const { data: ok } = await admin.rpc("deploy_has_access", { p: a.userId });
   if (!ok) throw new HttpErr(402, "subscription_required", "An active subscription is required.");
-  const { data: row } = await admin.from("deploy_models").select("id,owner,sha,settings,deployed").eq("id", a.modelId).maybeSingle();
+  const { data: row } = await admin.from("deploy_models").select("id,owner,sha,settings,deployed,source").eq("id", a.modelId).maybeSingle();
   if (!row || row.owner !== a.userId) throw new HttpErr(404, "model_not_found", "Model not found.");   // same answer for "not yours" and "doesn't exist"
   if (a.via === "api" && !row.deployed) throw new HttpErr(403, "not_deployed", "This model is not deployed.");
 
