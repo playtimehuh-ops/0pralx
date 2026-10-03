@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     if (req.method === "POST" && uploadAction === "upload_model") {
       await requireAccess(uid);
       const storagePath = String(req.headers.get("x-nova-storage-path") ?? "");
-      if (!/^[0-9a-f]{8}-[0-9a-f-]{27}\\/mdl_[0-9a-f]{10}\\.json\\.gz$/.test(storagePath) || !storagePath.startsWith(uid + "/"))
+      if (!/^[0-9a-f]{8}-[0-9a-f-]{27}\/mdl_[0-9a-f]{10}\.json\.gz$/.test(storagePath) || !storagePath.startsWith(uid + "/"))
         throw new HttpErr(400, "bad_source", "Invalid model storage path.");
       const bytes = new Uint8Array(await req.arrayBuffer());
       if (!bytes.byteLength) throw new HttpErr(400, "empty_upload", "The model upload is empty.");
