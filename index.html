@@ -110,7 +110,7 @@ async function call(action,body={}){
  if(r.error){let m=r.error.message,code;try{const j=await r.error.context.json();m=j.error||m;code=j.code}catch(e){}const e=Error(m);e.code=code;throw e}return r.data}
 const money=()=>A?('$'+(A.price_cents/100).toFixed(2).replace(/\.00$/,'')+' / '+A.interval):'';
 const badge=s=>`<span class="st ${s}">${ST[s]}</span>`;
-function fail(e){if(e.code==='subscription_required')needSub();else if(e.code==='insufficient_credits')dlg('<h2>Out of credits</h2><p class="small">This 30-day access period's credits are used up. Submit another $10 voucher after the period ends if you want a new 30-day period.</p><button class="btn" data-x>OK</button>');else alert(e.message)}
+function fail(e){if(e.code==='subscription_required')needSub();else if(e.code==='insufficient_credits')dlg(`<h2>Out of credits</h2><p class="small">This 30-day access period's credits are used up. Submit another $10 voucher after the period ends if you want a new 30-day period.</p><button class="btn" data-x>OK</button>`);else alert(e.message)}
 const safe=f=>async(...a)=>{try{await f(...a)}catch(e){fail(e)}};
 /* ---- dialogs ---- */
 function dlg(html,wire){const o=$('#dlg'),close=()=>o.classList.add('hide');$('#dbox').innerHTML=html;o.classList.remove('hide');o.onclick=e=>{if(e.target===o)close()};$('#dbox').querySelectorAll('[data-x]').forEach(b=>b.onclick=close);wire&&wire(close)}
