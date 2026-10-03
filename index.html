@@ -210,7 +210,7 @@ $('#bCreate').onclick=async()=>{$('#dMsg').textContent='';if(!pending)return;con
   const uploadBlob=await gzipBlob(new Blob([rawModel],{type:'application/json'}));
   const storagePath=S.id+'/'+id+'.json.gz';
   await storageUpload(uploadBlob,storagePath,(done,total)=>{const pct=Math.round(done/total*100);b.textContent='Uploading… '+pct+'%';});
-  b.textContent='Validating on server…';await call('register_model',{id,name,source:{path:storagePath},settings:{desc:$('#dDesc').value,temp:+$('#dTemp').value,topK:+$('#dTopK').value,topP:+$('#dTopP').value,maxTok:+$('#dMax').value}});
+  b.textContent='Validating on server…';await call('register_model',{id,name,source:{path:storagePath,params:Number(pending.paramCount||pending.params||pending.config?.paramCount||pending.config?.parameters||0),steps:Number(pending.stepCount||0),epochs:Number(pending.epochsDone||0)},settings:{desc:$('#dDesc').value,temp:+$('#dTemp').value,topK:+$('#dTopK').value,topP:+$('#dTopP').value,maxTok:+$('#dMax').value}});
   pending=null;tab('models')}catch(x){if(x.code==='subscription_required')needSub();else $('#dMsg').textContent=x.message}finally{b.disabled=false;b.textContent='Upload & deploy'}};
 /* ---- test: the playground runs the real model on the server and spends credits ---- */
 const addMsg=(r,t)=>{const d=document.createElement('div');d.className='m '+r;d.textContent=t;$('#msgs').appendChild(d);$('#msgs').scrollTop=1e9;return d};
