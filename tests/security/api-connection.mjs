@@ -41,6 +41,37 @@ await run("fake API key cannot authenticate", async () => {
   assert(r.status === 401, `expected 401, got ${r.status}`);
 });
 
+await run("non-JSON content type is rejected", async () => {
+  const r = await fetch(BASE, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: "{}",
+    redirect: "manual",
+  });
+  assert(r.status === 415, `expected 415, got ${r.status}`);
+});
+
+await run("invalid model ID is rejected before upstream", async () => {
+  const r = await post(JSON.stringify({
+    model: "not-a-model",
+    messages: [{ role: "user", content: "security-test" }],
+  }), {
+    Authorization: "Bearer nova_sk_security_test_invalid_00000000000000000000",
+  });
+  assert(r.status === 400 || r.status === 401, `expected 400/401, got ${r.status}`);
+});
+
+await run("invalid max_tokens is rejected", async () => {
+  const r = await post(JSON.stringify({
+    model: "mdl_securitytest",
+    messages: [{ role: "user", content: "security-test" }],
+    max_tokens: 301,
+  }), {
+    Authorization: "Bearer nova_sk_security_test_invalid_00000000000000000000",
+  });
+  assert(r.status === 400 || r.status === 401, `expected 400/401, got ${r.status}`);
+});
+
 await run("malformed JSON is rejected", async () => {
   const r = await post("{ definitely-not-json");
   assert(r.status === 400, `expected 400, got ${r.status}`);
