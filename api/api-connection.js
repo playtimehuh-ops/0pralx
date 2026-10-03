@@ -1,3 +1,5 @@
+import { NovaModel, BPETokenizer } from "../supabase/functions/_shared/engine.js";
+
 const buckets = new Map();
 const MAX_BODY_BYTES = 64 * 1024;
 const IP_LIMIT = 120;
