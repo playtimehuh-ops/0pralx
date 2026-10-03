@@ -155,6 +155,67 @@ $('#mList').onclick=safe(async e=>{const b=e.target.closest('[data-a]');if(!b)re
 function editDlg(m){const s=m.settings;dlg(`<h2>Set up “${esc(m.name)}”</h2><label>Name</label><input id="eN" value="${esc(m.name)}" maxlength="40"><label>Description</label><input id="eD" value="${esc(s.desc||'')}" maxlength="140"><div class="row"><div><label>Temperature</label><input id="eT" type="number" step="0.05" min="0.1" max="2" value="${s.temp}"></div><div><label>Top-K</label><input id="eK" type="number" min="1" max="200" value="${s.topK}"></div><div><label>Top-P</label><input id="eP" type="number" step="0.05" min="0.1" max="1" value="${s.topP}"></div><div><label>Max tokens</label><input id="eM" type="number" min="8" max="300" value="${s.maxTok}"></div></div><button class="btn" id="eS">Save</button><button class="btn sec" data-x>Cancel</button><div class="err" id="eE"></div>`,c=>$('#eS').onclick=async()=>{
   try{await call('update_model',{id:m.id,name:$('#eN').value,settings:{desc:$('#eD').value,temp:+$('#eT').value,topK:+$('#eK').value,topP:+$('#eP').value,maxTok:+$('#eM').value}});c();loadModels()}catch(x){$('#eE').textContent=x.message}})}
 const can=()=>{if(!S){authDlg();return false}if(!A||!A.access){needSub();return false}return true};
+
+/* Large model uploads: use Supabase TUS resumable uploads so the browser
+   streams 6 MiB chunks directly to Storage instead of buffering the whole
+   model through the normal multipart upload path. */
+async function tusUpload(path,blob,onProgress){
+  let session=(await sb.auth.getSession()).data.session;
+  if(!session)throw Error('Your session expired. Please sign in again.');
+  const endpoint=`${SBURL.replace('.supabase.co','.storage.supabase.co')}/storage/v1/upload/resumable`;
+  const meta=[
+    ['bucketName','nova-deploy-models'],
+    ['objectName',path],
+    ['contentType',blob.type||'application/json'],
+    ['cacheControl','3600']
+  ].map(([k,v])=>`${k} ${btoa(unescape(encodeURIComponent(v))) }`.trim()).join(',');
+  const start=async(token)=>{
+    const r=await fetch(endpoint,{method:'POST',headers:{
+      'Authorization':`Bearer ${token}`,'apikey':SBCFG.key,
+      'Tus-Resumable':'1.0.0','Upload-Length':String(blob.size),
+      'Upload-Metadata':meta,'x-upsert':'false'
+    }});
+    if(!r.ok)throw Object.assign(new Error(await r.text()||`Upload start failed (${r.status})`),{status:r.status});
+    const loc=r.headers.get('Location');
+    if(!loc)throw Error('Storage did not return an upload URL.');
+    return loc;
+  };
+  let loc;
+  try{loc=await start(session.access_token)}
+  catch(e){
+    if(e.status!==401)throw e;
+    const refreshed=await sb.auth.refreshSession();
+    session=refreshed.data.session;
+    if(!session)throw Error('Your session expired. Please sign in again.');
+    loc=await start(session.access_token);
+  }
+  const chunkSize=6*1024*1024;
+  let offset=0;
+  while(offset<blob.size){
+    const end=Math.min(offset+chunkSize,blob.size);
+    const chunk=blob.slice(offset,end);
+    let r=await fetch(loc,{method:'PATCH',headers:{
+      'Authorization':`Bearer ${session.access_token}`,'apikey':SBCFG.key,
+      'Tus-Resumable':'1.0.0','Upload-Offset':String(offset),
+      'Content-Type':'application/offset+octet-stream'
+    },body:chunk});
+    if(r.status===401){
+      const refreshed=await sb.auth.refreshSession();
+      session=refreshed.data.session;
+      if(!session)throw Error('Your session expired. Please sign in again.');
+      r=await fetch(loc,{method:'PATCH',headers:{
+        'Authorization':`Bearer ${session.access_token}`,'apikey':SBCFG.key,
+        'Tus-Resumable':'1.0.0','Upload-Offset':String(offset),
+        'Content-Type':'application/offset+octet-stream'
+      },body:chunk});
+    }
+    if(!r.ok)throw Error(await r.text()||`Upload failed (${r.status})`);
+    const next=Number(r.headers.get('Upload-Offset'));
+    if(!Number.isFinite(next)||next<=offset)throw Error('Storage returned an invalid upload offset.');
+    offset=next;
+    onProgress&&onProgress(offset,blob.size);
+  }
+}
 /* ---- create & deploy ---- */
 function normalize(o){if(o&&o.format==='nova-ai-backup'){const b=o.model;if(!b||!b.weights||!b.config||!b.vocabSize)throw Error('This backup contains no trained model');if(!o.tokenizer)throw Error('This backup has no tokenizer');
  return{format:'nova-model',config:b.config,vocabSize:b.vocabSize,weights:b.weights,tokenizer:o.tokenizer,stepCount:b.stepCount||0,epochsDone:b.epochsDone||0,createdAt:o.createdAt}}
@@ -165,7 +226,8 @@ $('#fImp').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#impInfo
  catch(x){pending=null;$('#stepName').classList.add('hide');$('#impInfo').innerHTML=`<span class="err">${esc(x.message)}</span>`}};
 $('#bCreate').onclick=async()=>{$('#dMsg').textContent='';if(!pending)return;const name=$('#dName').value.trim();if(!name){$('#dMsg').textContent='Give your AI a name';return}if(!can())return;
  const b=$('#bCreate');b.disabled=true;b.textContent='Uploading…';
- try{const id='mdl_'+hex(5);await q(sb.storage.from('nova-deploy-models').upload(`${S.id}/${id}.json`,new Blob([JSON.stringify(pending)],{type:'application/json'}),{contentType:'application/json'}));
+ try{const id='mdl_'+hex(5);const uploadBlob=new Blob([JSON.stringify(pending)],{type:'application/json'});const uploadPath=`${S.id}/${id}.json`;
+  await tusUpload(uploadPath,uploadBlob,(done,total)=>{const pct=Math.round(done/total*100);b.textContent=`Uploading… ${pct}%`;});
   b.textContent='Validating on server…';await call('register_model',{id,name,settings:{desc:$('#dDesc').value,temp:+$('#dTemp').value,topK:+$('#dTopK').value,topP:+$('#dTopP').value,maxTok:+$('#dMax').value}});
   pending=null;tab('models')}catch(x){if(x.code==='subscription_required')needSub();else $('#dMsg').textContent=x.message}finally{b.disabled=false;b.textContent='Upload & deploy'}};
 /* ---- test: the playground runs the real model on the server and spends credits ---- */
