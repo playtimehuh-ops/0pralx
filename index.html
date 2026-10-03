@@ -165,11 +165,12 @@ async function gzipBlob(blob){
 }
 async function storageUpload(blob,path,onProgress){
   if(!sb||!S) throw Error('Sign in before uploading a model.');
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session?.access_token) throw Error('Your session expired. Sign in again.');
   onProgress&&onProgress(0,blob.size);
-  const {error}=await sb.storage.from('nova-deploy-models').upload(
-    path,blob,{contentType:'application/gzip',cacheControl:'3600',upsert:false}
-  );
-  if(error) throw Object.assign(new Error(error.message||'Supabase Storage upload failed.'),{code:'storage_upload_failed'});
+  const url=SBURL.replace(/\\/$/,'')+'/storage/v1/object/nova-deploy-models/'+path.split('/').map(encodeURIComponent).join('/');
+  const r=await fetch(url,{method:'POST',headers:{apikey:SBCFG.key,Authorization:'Bearer '+session.access_token,'Content-Type':'application/gzip','x-upsert':'false'},body:blob});
+  if(!r.ok){let m='Supabase Storage upload failed.';try{const j=await r.json();m=j.message||j.error||m}catch(e){}throw Object.assign(new Error(m),{code:'storage_upload_failed'});}
   onProgress&&onProgress(blob.size,blob.size);
   return path;
 }
