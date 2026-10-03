@@ -159,6 +159,11 @@ const can=()=>{if(!S){authDlg();return false}if(!A||!A.access){needSub();return 
 /* Large model uploads: use Supabase TUS resumable uploads so the browser
    streams 6 MiB chunks directly to Storage instead of buffering the whole
    model through the normal multipart upload path. */
+async function gzipBlob(blob){
+  if(!('CompressionStream' in window)) throw Error('This browser does not support compressed model uploads.');
+  const stream=blob.stream().pipeThrough(new CompressionStream('gzip'));
+  return new Blob([await new Response(stream).arrayBuffer()],{type:'application/gzip'});
+}
 async function tusUpload(path,blob,onProgress){
   let session=(await sb.auth.getSession()).data.session;
   if(!session)throw Error('Your session expired. Please sign in again.');
@@ -226,7 +231,9 @@ $('#fImp').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#impInfo
  catch(x){pending=null;$('#stepName').classList.add('hide');$('#impInfo').innerHTML=`<span class="err">${esc(x.message)}</span>`}};
 $('#bCreate').onclick=async()=>{$('#dMsg').textContent='';if(!pending)return;const name=$('#dName').value.trim();if(!name){$('#dMsg').textContent='Give your AI a name';return}if(!can())return;
  const b=$('#bCreate');b.disabled=true;b.textContent='Uploading…';
- try{const id='mdl_'+hex(5);const uploadBlob=new Blob([JSON.stringify(pending)],{type:'application/json'});const uploadPath=`${S.id}/${id}.json`;
+ try{const id='mdl_'+hex(5);const rawModel=JSON.stringify(pending);
+  const uploadBlob=await gzipBlob(new Blob([rawModel],{type:'application/json'}));
+  const uploadPath=`${S.id}/${id}.json.gz`;
   await tusUpload(uploadPath,uploadBlob,(done,total)=>{const pct=Math.round(done/total*100);b.textContent=`Uploading… ${pct}%`;});
   b.textContent='Validating on server…';await call('register_model',{id,name,settings:{desc:$('#dDesc').value,temp:+$('#dTemp').value,topK:+$('#dTopK').value,topP:+$('#dTopP').value,maxTok:+$('#dMax').value}});
   pending=null;tab('models')}catch(x){if(x.code==='subscription_required')needSub();else $('#dMsg').textContent=x.message}finally{b.disabled=false;b.textContent='Upload & deploy'}};
