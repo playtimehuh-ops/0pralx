@@ -171,23 +171,113 @@ export default async function handler(req, res) {
     return;
   }
 
-  try {
-    const upstream = "https://jtstdajaaasucialvsfs.supabase.co/functions/v1/v1";
-    const response = await fetch(upstream, {
+  let prep;
+  const context = async (payload) => {
+    const rr = await fetch("https://jtstdajaaasucialvsfs.supabase.co/functions/v1/api-context", {
       method: "POST",
-      headers: {
-        "Authorization": "Bearer " + key,
-        "Content-Type": "application/json"
-      },
-      body: serialized,
-      redirect: "manual"
+      headers: { "Authorization": "Bearer " + key, "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const dd = await rr.json().catch(() => ({ error: "API context returned invalid JSON." }));
+    if (!rr.ok) {
+      const x = new Error(dd.error || "API context request failed.");
+      x.code = dd.code;
+      throw x;
+    }
+    return dd;
+  };
+
+  try {
+    prep = await context({
+      action: "prepare",
+      modelId: body.model,
+      messages: body.messages,
+      maxTokens: body.max_tokens,
+      temperature: body.temperature
+    });
+  } catch (x) {
+    reject(res, x.code === "subscription_required" || x.code === "insufficient_credits" ? 402 : x.code === "invalid_api_key" ? 401 : x.code === "model_not_found" ? 404 : 400, x.code || "api_error", x.message);
+    return;
+  }
+
+  try {
+    let t, m;
+    const cached = modelCache.get(prep.modelId);
+    if (cached && cached.sha === prep.sha) {
+      ({ t, m } = cached);
+    } else {
+      const r = await fetch(prep.signedUrl, { cache: "no-store" });
+      if (!r.ok) throw new Error("weights_download_failed");
+      const compressed = new Uint8Array(await r.arrayBuffer());
+      const digest = [...new Uint8Array(await crypto.subtle.digest("SHA-256", compressed))]
+        .map(b => b.toString(16).padStart(2, "0")).join("");
+      if (digest !== prep.sha) throw new Error("integrity");
+
+      const raw = await new Response(
+        new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"))
+      ).arrayBuffer();
+      const o = JSON.parse(new TextDecoder().decode(raw));
+      t = BPETokenizer.fromJSON(o.tokenizer);
+      m = new NovaModel(o.vocabSize, o.config);
+      const d = m.cfg.dModel;
+      if (
+        t.size !== o.vocabSize ||
+        o.weights.wte?.length !== o.vocabSize * d ||
+        o.weights.wpe?.length !== m.cfg.ctxLen * d ||
+        o.weights.layers?.length !== m.cfg.nLayers
+      ) throw new Error("weight_shapes");
+      m.loadWeights(o.weights);
+      m.eosId = t.vocab["<EOS>"];
+      modelCache.set(prep.modelId, { sha: prep.sha, t, m });
+      if (modelCache.size > 3) modelCache.delete(modelCache.keys().next().value);
+    }
+
+    const ids = t.encode(prep.prompt);
+    const t0 = performance.now();
+    const out = m.generateFast(
+      ids, prep.maxTok, prep.temp,
+      prep.settings?.topK || 30,
+      prep.settings?.topP || 0.9,
+      { stop: false }
+    );
+    const ms = Math.round(performance.now() - t0);
+
+    let reply = t.decode(out.slice(ids.length));
+    const cut = reply.indexOf("\nUser:");
+    if (cut >= 0) reply = reply.slice(0, cut);
+
+    const outTok = out.length - ids.length;
+    const actual = ids.length * prep.creditsIn + outTok * prep.creditsOut;
+    const settled = await context({
+      action: "settle",
+      alloc: prep.alloc,
+      reserve: prep.reserve,
+      actual,
+      modelId: prep.modelId,
+      inputTokens: ids.length,
+      outputTokens: outTok,
+      ms
     });
 
-    const text = await response.text();
-    res.status(response.status);
-    res.send(text);
-  } catch {
-    reject(res, 502, "upstream_unavailable", "API connection is temporarily unavailable.");
+    res.status(200).send(JSON.stringify({
+      reply: reply.trim() || "(empty output)",
+      usage: {
+        prompt_tokens: ids.length,
+        completion_tokens: outTok,
+        credits_used: Math.min(actual, prep.reserve),
+        credits_remaining: settled.credits_remaining
+      }
+    }));
+  } catch (x) {
+    try {
+      await context({ action: "release", alloc: prep.alloc, reserve: prep.reserve });
+    } catch {}
+    const msg =
+      x.message === "integrity" ? "Stored model failed its integrity check." :
+      x.message === "weights_download_failed" ? "Model weights could not be downloaded." :
+      x.message === "weight_shapes" ? "This model export is invalid." :
+      "Model execution failed.";
+    reject(res, 500, "execution_failed", msg);
   }
 }
 
