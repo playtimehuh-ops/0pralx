@@ -165,13 +165,27 @@ async function gzipBlob(blob){
 }
 async function storageUpload(blob,path,onProgress){
   if(!sb||!S) throw Error('Sign in before uploading a model.');
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session?.access_token) throw Error('Your session expired. Sign in again.');
   onProgress&&onProgress(0,blob.size);
-  const {error}=await sb.storage.from('nova-deploy-models').upload(
-    path,blob,{contentType:'application/gzip',cacheControl:'3600',upsert:false}
-  );
-  if(error) throw Object.assign(new Error(error.message||'Supabase Storage upload failed.'),{code:'storage_upload_failed'});
-  onProgress&&onProgress(blob.size,blob.size);
-  return path;
+  const base=SBURL.replace(/\\/$/,'');
+  const url=base+'/storage/v1/object/nova-deploy-models/'+path.split('/').map(encodeURIComponent).join('/');
+  return await new Promise((resolve,reject)=>{
+    const xhr=new XMLHttpRequest();
+    xhr.open('POST',url,true);
+    xhr.setRequestHeader('apikey',SBCFG.key);
+    xhr.setRequestHeader('Authorization','Bearer '+session.access_token);
+    xhr.setRequestHeader('Content-Type','application/gzip');
+    xhr.setRequestHeader('x-upsert','false');
+    xhr.upload.onprogress=e=>{if(e.lengthComputable)onProgress&&onProgress(e.loaded,e.total)};
+    xhr.onerror=()=>reject(Object.assign(new Error('Network error while uploading the model.'),{code:'storage_upload_failed'}));
+    xhr.onload=()=>{
+      if(xhr.status>=200&&xhr.status<300){onProgress&&onProgress(blob.size,blob.size);resolve(path);return}
+      let m='Supabase Storage upload failed.';try{const j=JSON.parse(xhr.responseText);m=j.message||j.error||m}catch(e){}
+      reject(Object.assign(new Error(m),{code:'storage_upload_failed'}));
+    };
+    xhr.send(blob);
+  });
 }
 /* ---- create & deploy ---- */
 function normalize(o){if(o&&o.format==='nova-ai-backup'){const b=o.model;if(!b||!b.weights||!b.config||!b.vocabSize)throw Error('This backup contains no trained model');if(!o.tokenizer)throw Error('This backup has no tokenizer');
