@@ -33,17 +33,19 @@ Deno.serve(async (req) => {
         await requireAccess(uid);
         const id = String(b.id ?? ""); if (!/^mdl_[0-9a-f]{10}$/.test(id)) throw new HttpErr(400, "bad_id", "Bad model id.");
         const name = String(b.name ?? "").trim().slice(0, 40); if (!name) throw new HttpErr(400, "bad_name", "Give your AI a name.");
-        const path = `${uid}/${id}.json`;
+        const path = `${uid}/${id}.json.gz`;
         try {
-          const { data: file, error } = await admin.storage.from("deploy_models").download(path);
+          const { data: file, error } = await admin.storage.from("nova-deploy-models").download(path);
           if (error || !file) throw new HttpErr(400, "no_upload", "Upload the model file first.");
-          const text = await file.text(), o = JSON.parse(text);
+          const compressed = new Uint8Array(await file.arrayBuffer());
+          const text = new TextDecoder().decode(await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
+          const o = JSON.parse(text);
           const { m, t } = buildModel(o);
           m.generate(t.encode("User: hi\nNova:"), 2, 0.8, 30, 0.9, { stop: false });          // smoke test with the real engine
           const { error: e2 } = await admin.from("deploy_models").insert({ id, owner: uid, name, version: "1.0." + (o.stepCount || 0), sha: await sha256(text),
             settings: cleanSettings(b.settings), source: { steps: o.stepCount || 0, epochs: o.epochsDone || 0, params: m.paramCount(), vocab: o.vocabSize, config: o.config, exportedAt: o.createdAt ?? null } });
           if (e2) throw new HttpErr(500, "db", e2.message);
-        } catch (e) { await admin.storage.from("deploy_models").remove([path]); throw e; }
+        } catch (e) { await admin.storage.from("nova-deploy-models").remove([path]); throw e; }
         return json({ id });
       }
       case "update_model": {
