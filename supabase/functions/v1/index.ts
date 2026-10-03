@@ -1,7 +1,7 @@
 // Public API:  POST /functions/v1/v1   Authorization: Bearer nova_sk_...
 // body: { "model": "mdl_...", "messages": [{ "role": "user", "content": "Hello" }], "max_tokens": 80, "temperature": 0.8 }
 // Deploy WITHOUT gateway JWT checking (keys are validated here):  supabase functions deploy v1 --no-verify-jwt
-import { admin, HttpErr, enforceRateLimit, runChat, securityHeaders, sha256 } from "../_shared/run.ts";
+import { admin, HttpErr, enforceRateLimit, runChat, securityHeaders, sha256 } from "./_shared/run.ts";
 
 const MAX_BODY_BYTES = 64 * 1024;
 const baseHeaders = { ...securityHeaders, "Content-Type": "application/json" };
