@@ -69,7 +69,7 @@ export default async function handler(req, res) {
     if (!/^Bearer\\s+eyJ[A-Za-z0-9_-]+\\./.test(auth)) { reject(res,401,"unauthenticated","Sign in first."); return; }
   }
   const keyMatch = chatMode ? null : /^Bearer (nova_sk_[A-Za-z0-9_-]{20,128})$/.exec(auth);
-  if (!keyMatch) {
+  if (!chatMode && !keyMatch) {
     reject(res, 401, "invalid_api_key", "Missing or malformed API key.");
     return;
   }
