@@ -168,7 +168,7 @@ async function storageUpload(blob,path,onProgress){
   const {data:{session}}=await sb.auth.getSession();
   if(!session?.access_token) throw Error('Your session expired. Sign in again.');
   onProgress&&onProgress(0,blob.size);
-  const base=SBURL.replace(/\\/$/,'');
+  const base=SBURL.replace(/\/$/,'');
   const url=base+'/storage/v1/object/nova-deploy-models/'+path.split('/').map(encodeURIComponent).join('/');
   return await new Promise((resolve,reject)=>{
     const xhr=new XMLHttpRequest();
