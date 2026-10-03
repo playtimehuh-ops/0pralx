@@ -33,19 +33,27 @@ Deno.serve(async (req) => {
         await requireAccess(uid);
         const id = String(b.id ?? ""); if (!/^mdl_[0-9a-f]{10}$/.test(id)) throw new HttpErr(400, "bad_id", "Bad model id.");
         const name = String(b.name ?? "").trim().slice(0, 40); if (!name) throw new HttpErr(400, "bad_name", "Give your AI a name.");
-        const path = `${uid}/${id}.json.gz`;
+        const rawUrl = String(b.source?.url ?? "");
+        let u: URL;
+        try { u = new URL(rawUrl); } catch { throw new HttpErr(400, "bad_source", "Model storage URL is invalid."); }
+        if (u.protocol !== "https:" || u.hostname !== "swift.subnp.com" || !u.pathname.startsWith("/files/"))
+          throw new HttpErr(400, "bad_source", "Model must be stored on the approved SwiftCDN file endpoint.");
+        const r = await fetch(u.toString(), { redirect: "error", headers: { "Accept": "application/gzip,application/octet-stream,*/*" } });
+        if (!r.ok || !r.body) throw new HttpErr(400, "no_upload", "The model file could not be downloaded from SwiftCDN.");
+        const compressed = new Uint8Array(await new Response(r.body).arrayBuffer());
+        if (compressed.byteLength > 250 * 1024 * 1024) throw new HttpErr(413, "model_too_large", "Model file is too large.");
         try {
-          const { data: file, error } = await admin.storage.from("nova-deploy-models").download(path);
-          if (error || !file) throw new HttpErr(400, "no_upload", "Upload the model file first.");
-          const compressed = new Uint8Array(await file.arrayBuffer());
           const text = new TextDecoder().decode(await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
           const o = JSON.parse(text);
           const { m, t } = buildModel(o);
-          m.generate(t.encode("User: hi\nNova:"), 2, 0.8, 30, 0.9, { stop: false });          // smoke test with the real engine
-          const { error: e2 } = await admin.from("deploy_models").insert({ id, owner: uid, name, version: "1.0." + (o.stepCount || 0), sha: await sha256(text),
-            settings: cleanSettings(b.settings), source: { steps: o.stepCount || 0, epochs: o.epochsDone || 0, params: m.paramCount(), vocab: o.vocabSize, config: o.config, exportedAt: o.createdAt ?? null } });
+          m.generate(t.encode("User: hi\\nNova:"), 2, 0.8, 30, 0.9, { stop: false });
+          const { error: e2 } = await admin.from("deploy_models").insert({
+            id, owner: uid, name, version: "1.0." + (o.stepCount || 0), sha: await sha256(text),
+            settings: cleanSettings(b.settings),
+            source: { url: u.toString(), steps: o.stepCount || 0, epochs: o.epochsDone || 0, params: m.paramCount(), vocab: o.vocabSize, config: o.config, exportedAt: o.createdAt ?? null }
+          });
           if (e2) throw new HttpErr(500, "db", e2.message);
-        } catch (e) { await admin.storage.from("nova-deploy-models").remove([path]); throw e; }
+        } catch (e) { throw e; }
         return json({ id });
       }
       case "update_model": {
