@@ -1,10 +1,8 @@
 // Authenticated app backend (JWT required). Every action re-checks identity, subscription and ownership on the server.
-// Secrets: STRIPE_SECRET_KEY, SITE_URL (exact https URL of the page)
-import Stripe from "npm:stripe@17";
+// Secrets: SELLAUTH_CHECKOUT_URL, SELLAUTH_PORTAL_URL (optional), SITE_URL
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { admin, buildModel, config, HttpErr, runChat, sha256 } from "./_shared/run.ts";
 
-const getStripe = () => { const key = Deno.env.get("STRIPE_SECRET_KEY"); if (!key?.trim()) throw new HttpErr(503, "stripe_not_configured", "Stripe is not configured. Add STRIPE_SECRET_KEY to the Supabase Edge Function secrets."); return new Stripe(key, { httpClient: Stripe.createFetchHttpClient() }); };
 const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-nova-action, x-nova-storage-path", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...cors, "Content-Type": "application/json" } });
 const sub402 = () => new HttpErr(402, "subscription_required", "An active subscription is required.");
@@ -142,37 +140,21 @@ Deno.serve(async (req) => {
       case "revoke_api_key":
         await admin.from("deploy_api_keys").update({ revoked_at: new Date().toISOString() }).eq("id", String(b.id)).eq("user_id", uid).is("revoked_at", null);
         return json({ ok: true });
-      case "checkout": {   // Stripe Checkout in subscription mode; price and credits come from app_config, never from the browser
-        const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-        const siteUrl = Deno.env.get("SITE_URL");
-        if (!stripeKey || !stripeKey.trim() || !siteUrl || !siteUrl.trim()) {
-          throw new HttpErr(503, "stripe_not_configured", "Stripe is not configured. Add STRIPE_SECRET_KEY and SITE_URL to the Supabase Edge Function secrets.");
-        }
-        let parsedSiteUrl: URL;
-        try { parsedSiteUrl = new URL(siteUrl); }
-        catch { throw new HttpErr(503, "stripe_not_configured", "Stripe is not configured correctly. SITE_URL must be a valid URL."); }
-        const { data: s } = await admin.from("deploy_subscriptions").select("*").eq("user_id", uid).maybeSingle();
-        if (s?.current_period_end && new Date(s.current_period_end) > new Date())
-          throw new HttpErr(409, "already_subscribed", s.auto_renew ? "You already have an active subscription." : "Your paid period is still running. Resume auto-renew instead.");
-        const { data: p } = await admin.from("deploy_profiles").select("stripe_customer_id").eq("id", uid).maybeSingle();
-        if (!p) throw new HttpErr(400, "no_profile", "Finish creating your profile first.");
-        let cust = p.stripe_customer_id;
-        if (!cust) { cust = (await getStripe().customers.create({ email: user.email, metadata: { user_id: uid } })).id; await admin.from("deploy_profiles").update({ stripe_customer_id: cust }).eq("id", uid); }
-        const cfg = await config(), ok = new URL(parsedSiteUrl.toString()), no = new URL(parsedSiteUrl.toString());
-        ok.searchParams.set("paid", "1"); no.searchParams.set("canceled", "1");
-        const session = await getStripe().checkout.sessions.create({
-          mode: "subscription", customer: cust, client_reference_id: uid, success_url: ok.toString(), cancel_url: no.toString(),
-          line_items: [{ quantity: 1, price_data: { currency: cfg.currency, unit_amount: Number(cfg.price_cents), recurring: { interval: cfg.interval as "month" },
-            product_data: { name: `Nova Deploy: ${Number(cfg.credits_per_period).toLocaleString()} credits per ${cfg.interval}` } } }],
-        });
-        return json({ url: session.url });
+      case "checkout": {   // SellAuth hosted checkout. The server decides access; the browser never supplies price/credits.
+        const checkoutUrl = Deno.env.get("SELLAUTH_CHECKOUT_URL");
+        if (!checkoutUrl?.trim()) throw new HttpErr(503, "sellauth_not_configured", "SellAuth is not configured. Add SELLAUTH_CHECKOUT_URL to the Supabase Edge Function secrets.");
+        let url: URL;
+        try { url = new URL(checkoutUrl); } catch { throw new HttpErr(503, "sellauth_not_configured", "SELLAUTH_CHECKOUT_URL must be a valid URL."); }
+        const cfg = await config();
+        url.searchParams.set("nova_user", uid);
+        url.searchParams.set("nova_email", user.email ?? "");
+        url.searchParams.set("nova_credits", String(cfg.credits_per_period));
+        return json({ url: url.toString() });
       }
-      case "set_renewal": {   // cancel = stop charging after the paid period; access is untouched until it ends
-        const { data: s } = await admin.from("deploy_subscriptions").select("*").eq("user_id", uid).maybeSingle();
-        if (!s?.stripe_subscription_id || new Date(s.current_period_end) <= new Date()) throw new HttpErr(400, "no_active_subscription", "No active subscription to change.");
-        await getStripe().subscriptions.update(s.stripe_subscription_id, { cancel_at_period_end: !b.on });
-        await admin.rpc("deploy_sync_renewal", { p_sub: s.stripe_subscription_id, p_auto: !!b.on });
-        return json({ ok: true });
+      case "set_renewal": {   // Subscription lifecycle is managed by SellAuth; optionally open its customer portal.
+        const portal = Deno.env.get("SELLAUTH_PORTAL_URL");
+        if (!portal?.trim()) throw new HttpErr(503, "sellauth_portal_not_configured", "Subscription management is handled by SellAuth. Add SELLAUTH_PORTAL_URL to enable the management button.");
+        return json({ url: portal });
       }
       default: throw new HttpErr(400, "unknown_action", "Unknown action.");
     }
