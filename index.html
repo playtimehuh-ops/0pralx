@@ -264,7 +264,6 @@ async function refreshAdmin(){
   try{IS_ADMIN=!!await q(sb.rpc('deploy_is_admin'));}catch(e){IS_ADMIN=false}
   if(IS_ADMIN)$('#adminNav').classList.remove('hide');
 }
-function maskVoucher(last4){return '•••• •••• •••• '+String(last4||'').padStart(4,'•')}
 function adminStatus(s){return s==='pending'?'<span class="st past_due">Pending</span>':s==='approved'?'<span class="st active">Approved</span>':'<span class="st none">Rejected</span>'}
 async function loadAdmin(){
   if(!S){authDlg();return}
@@ -282,7 +281,7 @@ async function loadAdmin(){
     <div class="card"><div class="wrapx"><table>
       <tr><th>Voucher</th><th>User</th><th>Submitted</th><th>Status</th><th>Review</th></tr>
       ${rows.length?rows.map(p=>`<tr>
-        <td class="mono">${maskVoucher(p.voucher_last4)}</td>
+        <td class="mono">${esc(p.voucher_code||'Unavailable')}</td>
         <td><b>${esc(p.user_email)}</b><div class="small mono">${esc(p.user_id)}</div></td>
         <td>${fd(p.created_at)}</td>
         <td>${adminStatus(p.status)}${p.reviewer_note?'<div class="small" style="margin-top:4px">'+esc(p.reviewer_note)+'</div>':''}</td>
