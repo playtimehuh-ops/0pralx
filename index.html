@@ -140,9 +140,9 @@ async function subscribe(){if(!S)return authDlg();manualPaymentDlg()}
 function manualPaymentDlg(){
  dlg(`<h2>Pay with Rewarble Visa</h2><div class="small" style="padding:12px 14px;margin:10px 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)"><b>Payment requirements</b><ul style="margin:8px 0 0 18px;padding:0"><li>Use a <b>Rewarble virtual Visa</b> with at least <b>$10 USD</b> available.</li><li>The Rewarble Visa is created by redeeming your Rewarble voucher on Rewarble.</li><li>Nova Deploy does <b>not</b> ask for or store your Visa card number, CVV, or expiry date.</li><li>Payment activation is still <b>manual review</b> in the current billing system.</li><li>After approval, you receive <b>6,000,000 credits for 30 days</b>.</li></ul></div><p class="small">Create your virtual Visa through Rewarble first. For security, never paste your Visa card number, CVV, or expiry date into Nova Deploy.</p><p class="small">For the current manual-review flow, submit the original Rewarble voucher used to create the Visa.</p><label>Rewarble voucher code</label><input id="rwCode" inputmode="numeric" autocomplete="off" maxlength="16" placeholder="16-digit code"><div class="err" id="rwErr"></div><button class="btn" id="rwSubmit">Submit for review</button><button class="btn sec" data-x>Cancel</button>`,c=>{
    $('#rwSubmit').onclick=async()=>{
-    const code=$('#rwCode').value.replace(/\\D/g,'');
+    const code=$('#rwCode').value.replace(/\D/g,'');
     $('#rwErr').textContent='';
-    if(!/^\\d{16}$/.test(code)){ $('#rwErr').textContent='Enter the 16-digit Rewarble voucher code.'; return; }
+    if(!/^\d{16}$/.test(code)){ $('#rwErr').textContent='Enter the 16-digit Rewarble voucher code.'; return; }
     $('#rwSubmit').disabled=true;$('#rwSubmit').textContent='Submitting…';
     try{
       await q(sb.from('deploy_manual_payments').insert({user_id:S.id,voucher_code:code,status:'pending'}));
@@ -152,7 +152,7 @@ function manualPaymentDlg(){
       $('#rwSubmit').disabled=false;$('#rwSubmit').textContent='Submit for review';
     }
    };
-   $('#rwCode').oninput=()=>{$('#rwCode').value=$('#rwCode').value.replace(/\\D/g,'').slice(0,16)};
+   $('#rwCode').oninput=()=>{$('#rwCode').value=$('#rwCode').value.replace(/\D/g,'').slice(0,16)};
   })
 }
 async function afterPay(){let f=null;try{f=sessionStorage.getItem('novaPaid');sessionStorage.removeItem('novaPaid')}catch(e){}if(!f)return;
