@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20xmlns%3Ac2pa%3D%22http%3A//c2pa.org/manifest%22%3E%3Cmetadata%3E%3Cc2pa%3Amanifest%3EAAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYToyNmZmMjcyNi1jZjc4LTQ4NGItOGJkNy01NGM5NDJhZmY1N2QAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaCk74TSSQtip3NgfPsRqaPEAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpmZTg4ZGQzMS0yMjljLTQyNTAtOWE1YS1mNTEyOTVlZjM5MzJscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNorB04Zzfa7%2BdH5pGOvoKibwAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggS1nZQ91b%2BcGFzZa8l0vCPC/1QlM4%2B9Vf7txaBMZpxuGkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaJhcTP9eVsd8/Q6zhQVoWPwAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCDrryFG37/6OmeNy7U4eI2vYgjLy4uPHbLBetDrvCY2IGRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBh7Zmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjI2ZmYyNzI2LWNmNzgtNDg0Yi04YmQ3LTU0Yzk0MmFmZjU3ZC9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmRjNjIwNzJmLTVhMGUtNGM5NS05YThlLTQ2YTE3ZDFiN2YyOHJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCBLWdlD3Vv5wYXNlryXS8I8L/VCUzj71V/u3FoExmnG4aJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggiXyt6edH1Kms/PFhp3VDAxQn6Wq4IgFrJjsnnELD7U2iY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFgg9Xexzf2MTA4rWhPpVoLFaxLDmCMzebJZdBtyqFBvWEB0Y2xhaW1fZ2VuZXJhdG9yX2luZm%2BjZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj%2BOPEz5o%2BnMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1%2BUCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9%2B1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQFnWXaWYxRAzwSK%2BgCVjqt5IADdKUL6zhvryHW7o68Vtse2PK9Y1/jksof/jwvthmpoKkSTY83s0SrV5xnbF%2BiA%3D%3C/c2pa%3Amanifest%3E%3C/metadata%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232b2b33%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23121216%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2215%22%20fill%3D%22url%28%23g%29%22/%3E%3Cpath%20d%3D%22M32%209%2036.5%2026%2053%2032%2036.5%2038%2032%2055%2027.5%2038%2011%2032%2027.5%2026Z%22%20fill%3D%22%23fff%22/%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%224.2%22%20fill%3D%22%235e6ad2%22/%3E%3C/svg%3E">
+<title>Nova — a language model learning from nothing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;510;590&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f4f4f5;--paper2:#f4f4f5;--page:#fff;--rule:#e6e6e8;--rule-soft:#efeff1;--ink:#1b1b1f;--ink-soft:#6f6f78;--ink-faint:#a3a3ab;--margin:#d0453b;--accent:#5e6ad2;--accent-soft:rgba(94,106,210,.1);--accent-line:rgba(94,106,210,.3);--forest:#2f9e5b;--forest-soft:rgba(47,158,91,.1);--ochre:#b7791f;--brick:#d0453b;--serif:Inter,-apple-system,'SF Pro Display',system-ui,'Segoe UI',sans-serif;--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+body.dark{--paper:#0b0b0d;--paper2:#1b1b1e;--page:#131315;--rule:#26262a;--rule-soft:#1e1e22;--ink:#ececef;--ink-soft:#9a9aa3;--ink-faint:#63636b;--accent-soft:rgba(94,106,210,.18)}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 var(--serif);font-feature-settings:'cv01','ss03';-webkit-font-smoothing:antialiased;display:flex}
+#bootOverlay{position:fixed;inset:0;background:var(--paper);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;animation:bootFade 2.2s ease forwards}
+#bootOverlay svg{width:120px;height:70px;overflow:visible}#bootOverlay svg circle{fill:var(--paper);stroke:var(--ink);stroke-width:1.4;opacity:0;animation:popIn .4s ease forwards}
+#bootOverlay svg line{stroke:var(--accent);stroke-width:1.2;stroke-dasharray:60;stroke-dashoffset:60;animation:drawLine .7s ease forwards}
+#bootOverlay .bootTitle{font-size:13px;color:var(--ink-soft)}
+@keyframes drawLine{to{stroke-dashoffset:0}}@keyframes popIn{to{opacity:1}}@keyframes bootFade{0%,75%{opacity:1}100%{opacity:0;visibility:hidden;pointer-events:none}}
+.appshell{flex:1;display:flex;min-width:0;height:100%}
+nav.rail{width:236px;flex-shrink:0;padding:14px 12px;display:flex;flex-direction:column;gap:2px;overflow:auto}
+.ws{display:flex;align-items:center;gap:9px;padding:2px 8px 14px;font-weight:510;font-size:15px}
+nav.rail button{display:flex;align-items:center;gap:10px;width:100%;padding:7px 8px;border:0;background:none;border-radius:8px;font:inherit;font-weight:450;color:var(--ink);cursor:pointer;text-align:left;transition:background .12s}
+nav.rail button:hover,nav.rail button.active{background:var(--rule-soft)}nav.rail button.active{font-weight:510}
+nav.rail svg{width:16px;height:16px;fill:none;stroke:var(--ink-soft);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sbf{margin-top:auto;padding:10px 8px 0;font-size:12px;color:var(--ink-soft)}.statusdot{width:7px;height:7px;border-radius:50%;background:var(--forest);display:inline-block;margin-right:7px}
+.panel{flex:1;min-width:0;margin:10px 10px 10px 0;background:var(--page);border:1px solid var(--rule);border-radius:18px;display:flex;flex-direction:column;overflow:hidden}
+header{height:46px;flex-shrink:0;padding:0 24px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--rule)}
+#crumb{font-weight:510}#pulseCanvas{height:26px;width:150px}
+header .status{margin-left:auto;display:flex;gap:16px;font-size:12px;color:var(--ink-soft);font-family:var(--mono)}
+main{flex:1;min-height:0;display:flex;position:relative;background:var(--page)}
+.tab{display:none;flex:1;overflow-y:auto;padding:28px 24px}.tab.active{display:flex;flex-direction:column}
+.tab>*{width:100%;max-width:800px;margin-left:auto;margin-right:auto}#tab-chat{padding:16px 24px!important}
+.card{background:var(--page);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;margin-bottom:12px}
+.row{display:flex;gap:12px;flex-wrap:wrap}.col{flex:1;min-width:140px}
+label{font-size:12.5px;font-weight:510;color:var(--ink-soft);display:block;margin-bottom:5px}
+input[type=text],input[type=number],textarea,select{width:100%;background:var(--page);border:1px solid var(--rule);border-radius:8px;color:var(--ink);padding:8px 10px;font:inherit;outline:0}
+input:focus,textarea:focus,select:focus{border-color:var(--ink-faint)}textarea{resize:vertical}input[type=file]{font-size:12.5px;color:var(--ink-soft)}
+button.btn{height:30px;padding:0 13px;background:var(--ink);color:var(--page);border:1px solid var(--ink);border-radius:8px;font:inherit;font-weight:510;font-size:13px;cursor:pointer;transition:opacity .12s}
+button.btn:hover{opacity:.85}button.btn.secondary{background:var(--page);color:var(--ink);border-color:var(--rule)}button.btn.secondary:hover{background:var(--rule-soft);opacity:1}
+button.btn.danger{background:var(--page);color:var(--brick);border-color:var(--rule)}button.btn:disabled{opacity:.35;cursor:not-allowed}
+.stat{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:7px 0;border-bottom:1px solid var(--rule-soft);font-size:13px}.stat:last-child{border-bottom:none}
+.stat span{color:var(--ink-soft)}.stat b{font-family:var(--mono);font-weight:500;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;word-break:break-word}
+h2{font-size:15px;margin:0 0 12px;font-weight:590;letter-spacing:-.2px}h3{font-size:13px;margin:0 0 8px;font-weight:590}
+#chatMessages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:8px 0 12px}
+.msg{max-width:100%;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;padding:6px 0}
+.msg.user{align-self:flex-end;max-width:72%;background:var(--paper);border-radius:12px;padding:10px 14px}.msg.nova{align-self:flex-start}
+.msg pre{background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:12px;overflow-x:auto;font:12.5px var(--mono);position:relative;margin:8px 0}
+.msg .copybtn{position:absolute;top:6px;right:6px;font-size:11px;background:var(--page);border:1px solid var(--rule);color:var(--ink-soft);padding:2px 8px;border-radius:6px;cursor:pointer}
+.msg .langtag{color:var(--ink-soft);font:11px var(--mono);display:block;margin-bottom:4px}
+#chatInputRow{display:flex;gap:10px;align-items:flex-end;border:1px solid var(--rule);border-radius:14px;padding:10px 12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+#chatInputRow textarea{flex:1;min-height:44px;max-height:140px;border:0;padding:2px;resize:none}
+.toolbar{display:flex;gap:8px;align-items:center;margin:10px 0;flex-wrap:wrap}#tab-chat .toolbar{margin-top:0}
+.toggle{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-soft)}
+.badge{font-size:11px;font-weight:510;padding:1px 8px;border-radius:10px;background:var(--rule-soft);color:var(--ink-soft);margin-left:6px;vertical-align:middle}
+.badge.pass{color:var(--forest);background:var(--forest-soft)}.badge.fail{color:var(--brick);background:rgba(208,69,59,.1)}
+.progressbar{height:6px;background:var(--rule-soft);border-radius:3px;overflow:hidden}.progressbar>div,#trainProgressBar{height:100%;background:var(--accent);width:0;transition:width .2s}
+.datasetItem,.memItem{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--rule);border-radius:10px;margin-bottom:8px;font-size:13px}
+.diagRow{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--rule-soft);font-size:13px}
+.small{font-size:12.5px;color:var(--ink-soft)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:var(--rule);border-radius:5px}::selection{background:var(--accent-soft)}
+@media(max-width:760px){body{flex-direction:column;overflow:auto}.appshell{flex-direction:column;height:auto}nav.rail{width:100%;flex-direction:row;flex-wrap:wrap}nav.rail button{width:auto}.ws,.sbf{display:none}.panel{margin:0 8px 8px;min-height:85vh}header .status{display:none}}
+@media(prefers-reduced-motion:reduce){#bootOverlay{animation:none!important;opacity:0!important;visibility:hidden!important}#bootOverlay svg *{animation:none!important}}
+</style>
+</head>
+<body>
+
+<div id="bootOverlay">
+  <svg viewBox="0 0 120 70">
+    <line x1="20" y1="35" x2="60" y2="14" style="animation-delay:0.1s;"/>
+    <line x1="20" y1="35" x2="60" y2="56" style="animation-delay:0.25s;"/>
+    <line x1="60" y1="14" x2="100" y2="35" style="animation-delay:0.4s;"/>
+    <line x1="60" y1="56" x2="100" y2="35" style="animation-delay:0.55s;"/>
+    <line x1="60" y1="14" x2="60" y2="56" style="animation-delay:0.7s;"/>
+    <circle cx="20" cy="35" r="5" style="animation-delay:0s;"/>
+    <circle cx="60" cy="14" r="5" style="animation-delay:0.35s;"/>
+    <circle cx="60" cy="56" r="5" style="animation-delay:0.5s;"/>
+    <circle cx="100" cy="35" r="5" style="animation-delay:0.85s;"/>
+  </svg>
+  <div class="bootTitle">reading the page, one weight at a time</div>
+</div>
+
+<div class="appshell">
+<nav class="rail"><div class="ws"><svg width="22" height="22" style="flex-shrink:0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYToyNmZmMjcyNi1jZjc4LTQ4NGItOGJkNy01NGM5NDJhZmY1N2QAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaCk74TSSQtip3NgfPsRqaPEAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpmZTg4ZGQzMS0yMjljLTQyNTAtOWE1YS1mNTEyOTVlZjM5MzJscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNorB04Zzfa7+dH5pGOvoKibwAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggS1nZQ91b+cGFzZa8l0vCPC/1QlM4+9Vf7txaBMZpxuGkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaJhcTP9eVsd8/Q6zhQVoWPwAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCDrryFG37/6OmeNy7U4eI2vYgjLy4uPHbLBetDrvCY2IGRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBh7Zmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjI2ZmYyNzI2LWNmNzgtNDg0Yi04YmQ3LTU0Yzk0MmFmZjU3ZC9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmRjNjIwNzJmLTVhMGUtNGM5NS05YThlLTQ2YTE3ZDFiN2YyOHJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCBLWdlD3Vv5wYXNlryXS8I8L/VCUzj71V/u3FoExmnG4aJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggiXyt6edH1Kms/PFhp3VDAxQn6Wq4IgFrJjsnnELD7U2iY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFgg9Xexzf2MTA4rWhPpVoLFaxLDmCMzebJZdBtyqFBvWEB0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQFnWXaWYxRAzwSK+gCVjqt5IADdKUL6zhvryHW7o68Vtse2PK9Y1/jksof/jwvthmpoKkSTY83s0SrV5xnbF+iA=</c2pa:manifest></metadata><defs><linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b2b33"/><stop offset="1" stop-color="#121216"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#gl)"/><path d="M32 9 36.5 26 53 32 36.5 38 32 55 27.5 38 11 32 27.5 26Z" fill="#fff"/><circle cx="32" cy="32" r="4.2" fill="#5e6ad2"/></svg>Nova</div><button data-tab="chat" class="active"><svg viewBox="0 0 16 16"><path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z"/></svg>Chat</button><button data-tab="train"><svg viewBox="0 0 16 16"><path d="M2 12l3.5-4 3 2.5L14 4"/><path d="M10 4h4v4"/></svg>Train</button><button data-tab="data"><svg viewBox="0 0 16 16"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>Data</button><button data-tab="memory"><svg viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10" rx="2"/><path d="M6 1.5v2M10 1.5v2M6 12.5v2M10 12.5v2"/></svg>Memory</button><button data-tab="model"><svg viewBox="0 0 16 16"><path d="M8 1.8 13.5 5v6L8 14.2 2.5 11V5z"/><path d="M2.5 5 8 8.2 13.5 5M8 8.2v6"/></svg>Model</button><button data-tab="settings"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.8v1.6M8 12.6v1.6M1.8 8h1.6M12.6 8h1.6M3.6 3.6l1.1 1.1M11.3 11.3l1.1 1.1M3.6 12.4l1.1-1.1M11.3 4.7l1.1-1.1"/></svg>Settings</button><div class="sbf"><i class="statusdot"></i>Local · no API</div></nav>
+<div class="panel"><header><span id="crumb">Chat</span><canvas id="pulseCanvas" width="300" height="28"></canvas><div class="status"><span id="deviceStatus">device —</span><span id="modelStatus">model —</span></div></header>
+<main>
+  <!-- CHAT TAB -->
+  <div class="tab active" id="tab-chat" style="padding:14px 18px;">
+    <div class="toolbar">
+      <label class="toggle"><input type="checkbox" id="codingMode"> Coding Mode</label>
+      <button class="btn secondary" id="btnClearChat">Clear Conversation</button>
+      <button class="btn secondary" id="btnRegenerate">Regenerate</button>
+      <button class="btn secondary" id="btnStopGen" disabled>Stop</button>
+      <span class="small" id="chatVocabWarning"></span>
+    </div>
+    <div id="chatMessages"></div>
+    <div id="chatInputRow">
+      <textarea id="chatInput" placeholder="Say something to Nova... (train it first for coherent output)"></textarea>
+      <button class="btn" id="btnSend">Send</button>
+    </div>
+  </div>
+
+  <!-- TRAIN TAB -->
+  <div class="tab" id="tab-train">
+    <div class="card">
+      <h2>Training Configuration</h2>
+      <div class="row">
+        <div class="col"><label>Epochs</label><input type="number" id="cfgEpochs" value="10" min="1"></div>
+        <div class="col"><label>Batch Size</label><input type="number" id="cfgBatch" value="4" min="1" max="16"></div>
+        <div class="col"><label>Learning Rate</label><input type="number" id="cfgLR" value="0.003" step="0.0001"></div>
+        <div class="col"><label>Context Length</label><input type="number" id="cfgCtx" value="64" min="8" max="128"></div>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <div class="col"><label>Model dim</label><input type="number" id="cfgDModel" value="48" min="8" max="256"></div>
+        <div class="col"><label>Heads</label><input type="number" id="cfgHeads" value="4" min="1" max="16"></div>
+        <div class="col"><label>Layers</label><input type="number" id="cfgLayers" value="2" min="1" max="8"></div>
+        <div class="col"><label>Target vocab size</label><input type="number" id="cfgVocab" value="1500" min="100" max="8000"></div>
+      </div>
+      <p class="small">Changing model dim/heads/layers/vocab requires (re)initializing the model — this resets weights unless you Load a saved model afterward.</p>
+      <div class="toolbar">
+        <button class="btn secondary" id="btnInitModel">Initialize / Reset Model</button>
+        <button class="btn" id="btnStartTrain">Start Training</button>
+        <button class="btn danger" id="btnStopTrain" disabled>Stop Training</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Progress</h2>
+      <div class="progressbar"><div id="trainProgressBar"></div></div>
+      <div style="margin-top:10px;" class="row">
+        <div class="col stat"><span>Epoch</span><b id="statEpoch">0 / 0</b></div>
+        <div class="col stat"><span>Step</span><b id="statStep">0</b></div>
+        <div class="col stat"><span>Training Loss</span><b id="statTrainLoss">—</b></div>
+        <div class="col stat"><span>Validation Loss</span><b id="statValLoss">—</b></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Learning Test</h2>
+      <p class="small">Run a fixed prompt before and after training to show the model's output actually changes, and confirm the underlying weight tensors changed.</p>
+      <div class="row">
+        <div class="col"><label>Test prompt</label><input type="text" id="learnTestPrompt" value="function "></div>
+      </div>
+      <div class="toolbar">
+        <button class="btn secondary" id="btnSnapshotBefore">Snapshot "Before" Output</button>
+        <button class="btn secondary" id="btnCompareAfter">Compare "After" Output</button>
+      </div>
+      <div class="stat"><span>Before</span><b id="learnBefore">—</b></div>
+      <div class="stat"><span>After</span><b id="learnAfter">—</b></div>
+      <div class="stat"><span>Weights changed</span><b id="learnChanged">—</b></div>
+    </div>
+  </div>
+
+  <!-- DATA TAB -->
+  <div class="tab" id="tab-data">
+    <div class="card">
+      <h2>Add Training Data</h2>
+      <textarea id="pasteData" rows="6" placeholder="Paste text or code here..."></textarea>
+      <div class="toolbar">
+        <input type="file" id="fileUpload" multiple accept=".txt,.py,.js,.ts,.html,.css,.sql,.java,.c,.cpp,.cs,.sh,.ps1,.md">
+        <button class="btn secondary" id="btnAddPaste">Add Pasted Text</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Datasets <span class="badge" id="datasetCount">0</span></h2>
+      <div id="datasetList"></div>
+      <div class="toolbar">
+        <button class="btn secondary" id="btnClearDatasets">Remove All</button>
+      </div>
+      <div class="stat"><span>Total characters</span><b id="statChars">0</b></div>
+      <div class="stat"><span>Vocabulary (after tokenizer train)</span><b id="statVocabSize">—</b></div>
+    </div>
+    <div class="card">
+      <h2>Preview</h2>
+      <pre id="dataPreview" style="white-space:pre-wrap;font-family:var(--mono);font-size:12px;color:var(--ink-soft);max-height:200px;overflow:auto;">No data yet.</pre>
+    </div>
+  </div>
+
+  <!-- MEMORY TAB -->
+  <div class="tab" id="tab-memory">
+    <div class="card">
+      <h2>Save to Memory</h2>
+      <p class="small">Memory is separate from neural training — it's retrieved as context when relevant, never dumped verbatim.</p>
+      <textarea id="memInput" rows="3" placeholder="e.g. My name is Alex. I prefer Python over JavaScript."></textarea>
+      <div class="toolbar"><button class="btn" id="btnSaveMemory">Save to Memory</button></div>
+    </div>
+    <div class="card">
+      <h2>Stored Memories <span class="badge" id="memCount">0</span></h2>
+      <div id="memList"></div>
+      <div class="toolbar">
+        <button class="btn secondary" id="btnDownloadMemory">Download Memory</button>
+        <input type="file" id="memImportFile" accept=".json" style="display:none;">
+        <button class="btn secondary" id="btnImportMemory">Import Memory</button>
+        <button class="btn danger" id="btnDeleteMemory">Delete All Memory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODEL TAB -->
+  <div class="tab" id="tab-model">
+    <div class="card">
+      <h2>Model Information</h2>
+      <div class="stat"><span>Name</span><b>Nova</b></div>
+      <div class="stat"><span>Architecture</span><b id="miArch">—</b></div>
+      <div class="stat"><span>Parameter count</span><b id="miParams">—</b></div>
+      <div class="stat"><span>Vocabulary size</span><b id="miVocab">—</b></div>
+      <div class="stat"><span>Context length</span><b id="miCtx">—</b></div>
+      <div class="stat"><span>Training steps</span><b id="miSteps">0</b></div>
+      <div class="stat"><span>Epochs completed</span><b id="miEpochs">0</b></div>
+      <div class="stat"><span>Current training loss</span><b id="miLoss">—</b></div>
+      <div class="stat"><span>Validation loss</span><b id="miValLoss">—</b></div>
+      <div class="stat"><span>Device</span><b id="miDevice">—</b></div>
+      <div class="stat"><span>Checkpoint status</span><b id="miCheckpoint">No saved model</b></div>
+    </div>
+    <div class="card">
+      <h2>Local Storage</h2>
+      <div class="toolbar">
+        <button class="btn" id="btnSaveModel">Save Model (IndexedDB)</button>
+        <button class="btn secondary" id="btnLoadModel">Load Model</button>
+        <button class="btn danger" id="btnDeleteModel">Delete Local Model</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Model Export / Import (weights only)</h2>
+      <div class="toolbar">
+        <button class="btn secondary" id="btnExportModel">Export Model (.json)</button>
+        <input type="file" id="modelImportFile" accept=".json" style="display:none;">
+        <button class="btn secondary" id="btnImportModel">Import Model</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Full JSON Backup</h2>
+      <p class="small">Contains model weights, tokenizer, training state, memory, conversation history, and settings.</p>
+      <div class="toolbar">
+        <button class="btn" id="btnExportFull">Export Full Backup</button>
+        <input type="file" id="fullImportFile" accept=".json" style="display:none;">
+        <button class="btn secondary" id="btnImportFull">Import Full Backup</button>
+      </div>
+      <div class="stat"><span>Backup validation</span><b id="backupValidation">—</b></div>
+    </div>
+    <div class="card">
+      <h2>Diagnostics</h2>
+      <div class="toolbar"><button class="btn secondary" id="btnRunDiagnostics">Run Diagnostics</button></div>
+      <div id="diagResults"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div class="tab" id="tab-settings">
+    <div class="card">
+      <h2>Generation Settings</h2>
+      <div class="row">
+        <div class="col"><label>Temperature</label><input type="number" id="setTemp" value="0.8" step="0.05" min="0.05" max="2"></div>
+        <div class="col"><label>Top-K</label><input type="number" id="setTopK" value="30" min="0"></div>
+        <div class="col"><label>Top-P</label><input type="number" id="setTopP" value="0.9" step="0.05" min="0" max="1"></div>
+        <div class="col"><label>Max tokens</label><input type="number" id="setMaxTok" value="80" min="1" max="500"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Appearance</h2>
+      <label>Theme</label>
+      <select id="setTheme"><option value="light">Light</option><option value="dark">Dark</option></select>
+    </div>
+    <div class="card">
+      <h2>Auto-save</h2>
+      <label class="toggle"><input type="checkbox" id="setAutoSave"> Automatically save model to IndexedDB after training</label>
+    </div>
+  </div>
+</main></div></div>
+
+<script>
+/* =========================================================================
+   NOVA — a genuine locally-trained transformer language model.
+   Single-file, no backend, no external AI API. All math below actually
+   computes forward + backward passes and updates real weight tensors.
+   ========================================================================= */
+
+/* ---------- Tensor helpers ---------- */
+function T(rows, cols) { return { rows, cols, data: new Float32Array(rows * cols) }; }
+function matmul(A, B) {
+  const m = A.rows, k = A.cols, n = B.cols;
+  const out = T(m, n);
+  for (let i = 0; i < m; i++) {
+    const ai = i * k, oi = i * n;
+    for (let p = 0; p < k; p++) {
+      const a = A.data[ai + p];
+      if (a === 0) continue;
+      const bp = p * n;
+      for (let j = 0; j < n; j++) out.data[oi + j] += a * B.data[bp + j];
+    }
+  }
+  return out;
+}
+function matmulT(A, B) {
+  const m = A.rows, k = A.cols, n = B.rows;
+  const out = T(m, n);
+  for (let i = 0; i < m; i++) {
+    const ao = i * k, oo = i * n;
+    for (let j = 0; j < n; j++) {
+      let s = 0; const bo = j * k;
+      for (let p = 0; p < k; p++) s += A.data[ao + p] * B.data[bo + p];
+      out.data[oo + j] = s;
+    }
+  }
+  return out;
+}
+function transpose(A) {
+  const out = T(A.cols, A.rows);
+  for (let i = 0; i < A.rows; i++) for (let j = 0; j < A.cols; j++) out.data[j * A.rows + i] = A.data[i * A.cols + j];
+  return out;
+}
+function addRowVec(A, v) { for (let i = 0; i < A.rows; i++) { const off = i * A.cols; for (let j = 0; j < A.cols; j++) A.data[off + j] += v[j]; } }
+function addInto(dst, src) { for (let i = 0; i < dst.length; i++) dst[i] += src[i]; }
+function sliceCols(A, start, len) { const out = T(A.rows, len); for (let i = 0; i < A.rows; i++) for (let j = 0; j < len; j++) out.data[i * len + j] = A.data[i * A.cols + start + j]; return out; }
+function setCols(dst, start, src) { for (let i = 0; i < dst.rows; i++) for (let j = 0; j < src.cols; j++) dst.data[i * dst.cols + start + j] = src.data[i * src.cols + j]; }
+function addCols(dst, start, src) { for (let i = 0; i < dst.rows; i++) for (let j = 0; j < src.cols; j++) dst.data[i * dst.cols + start + j] += src.data[i * src.cols + j]; }
+function randn() { let u = 0, v = 0; while (u === 0) u = Math.random(); while (v === 0) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+let PARAMS = [];
+function newTensorParam(rows, cols, scale) {
+  const p = T(rows, cols);
+  for (let i = 0; i < p.data.length; i++) p.data[i] = randn() * scale;
+  const grad = new Float32Array(p.data.length), m = new Float32Array(p.data.length), v = new Float32Array(p.data.length);
+  PARAMS.push({ data: p.data, grad, m, v });
+  p.grad = grad;
+  return p;
+}
+function newVecParam(len, fillVal) {
+  const data = new Float32Array(len);
+  if (fillVal !== undefined) data.fill(fillVal);
+  const grad = new Float32Array(len), m = new Float32Array(len), v = new Float32Array(len);
+  PARAMS.push({ data, grad, m, v });
+  return { data, grad };
+}
+function zeroGrads(paramList) { for (const p of paramList) p.grad.fill(0); }
+function adamStep(paramList, lr, step, beta1, beta2, eps) {
+  beta1 = beta1 ?? 0.9; beta2 = beta2 ?? 0.98; eps = eps ?? 1e-9;
+  const b1t = 1 - Math.pow(beta1, step), b2t = 1 - Math.pow(beta2, step);
+  for (const p of paramList) {
+    const { data, grad, m, v } = p;
+    for (let i = 0; i < data.length; i++) {
+      const g = grad[i];
+      m[i] = beta1 * m[i] + (1 - beta1) * g;
+      v[i] = beta2 * v[i] + (1 - beta2) * g * g;
+      const mhat = m[i] / b1t, vhat = v[i] / b2t;
+      data[i] -= lr * mhat / (Math.sqrt(vhat) + eps);
+    }
+  }
+}
+
+/* ---------- BPE Tokenizer ---------- */
+class BPETokenizer {
+  constructor() { this.specials = ['<PAD>', '<BOS>', '<EOS>', '<UNK>']; this.vocab = {}; this.idToToken = []; this.merges = []; }
+  _preTokenize(text) { return text.match(/[ \t]+|\n|[A-Za-z0-9_]+|[^\sA-Za-z0-9_]/g) || []; }
+  train(text, targetVocabSize, minFreq) {
+    targetVocabSize = targetVocabSize || 1500; minFreq = minFreq || 2;
+    const words = this._preTokenize(text);
+    const wordFreq = new Map();
+    for (const w of words) wordFreq.set(w, (wordFreq.get(w) || 0) + 1);
+    const seqs = new Map(); const baseChars = new Set();
+    for (const w of wordFreq.keys()) { const arr = Array.from(w); seqs.set(w, arr); for (const c of arr) baseChars.add(c); }
+    let vocabList = [...this.specials, ...Array.from(baseChars).sort()];
+    const merges = [];
+    const numMerges = Math.max(0, targetVocabSize - vocabList.length);
+    for (let iter = 0; iter < numMerges; iter++) {
+      const pairCounts = new Map();
+      for (const [w, freq] of wordFreq) {
+        const seq = seqs.get(w);
+        for (let j = 0; j < seq.length - 1; j++) { const key = seq[j] + '\u0001' + seq[j + 1]; pairCounts.set(key, (pairCounts.get(key) || 0) + freq); }
+      }
+      let bestKey = null, bestCount = 0;
+      for (const [k, c] of pairCounts) if (c > bestCount) { bestCount = c; bestKey = k; }
+      if (!bestKey || bestCount < minFreq) break;
+      const [a, b] = bestKey.split('\u0001');
+      merges.push([a, b]);
+      const merged = a + b;
+      vocabList.push(merged);
+      for (const [w, seq] of seqs) {
+        const ns = []; let j = 0;
+        while (j < seq.length) { if (j < seq.length - 1 && seq[j] === a && seq[j + 1] === b) { ns.push(merged); j += 2; } else { ns.push(seq[j]); j++; } }
+        seqs.set(w, ns);
+      }
+    }
+    this.merges = merges; this.idToToken = vocabList;
+    this.vocab = {}; vocabList.forEach((t, i) => this.vocab[t] = i);
+  }
+  encode(text, addBos, addEos) {
+    const ids = [];
+    if (addBos) ids.push(this.vocab['<BOS>']);
+    const words = this._preTokenize(text);
+    for (const w of words) {
+      let seq = Array.from(w);
+      for (const [a, b] of this.merges) {
+        const merged = a + b; const ns = []; let j = 0;
+        while (j < seq.length) { if (j < seq.length - 1 && seq[j] === a && seq[j + 1] === b) { ns.push(merged); j += 2; } else { ns.push(seq[j]); j++; } }
+        seq = ns;
+      }
+      for (const t of seq) ids.push(this.vocab[t] !== undefined ? this.vocab[t] : this.vocab['<UNK>']);
+    }
+    if (addEos) ids.push(this.vocab['<EOS>']);
+    return ids;
+  }
+  decode(ids) { return ids.map(id => this.idToToken[id] || '').join(''); }
+  get size() { return this.idToToken.length; }
+  toJSON() { return { idToToken: this.idToToken, merges: this.merges, specials: this.specials }; }
+  static fromJSON(obj) { const t = new BPETokenizer(); t.idToToken = obj.idToToken; t.merges = obj.merges; t.specials = obj.specials || t.specials; t.vocab = {}; t.idToToken.forEach((tok, i) => t.vocab[tok] = i); return t; }
+}
+
+/* ---------- LayerNorm / Linear / ReLU / Softmax ---------- */
+function lnForward(X, gamma, beta, eps) {
+  eps = eps || 1e-5;
+  const Tr = X.rows, D = X.cols;
+  const norm = T(Tr, D); const std = new Float32Array(Tr);
+  for (let i = 0; i < Tr; i++) {
+    let mean = 0; const off = i * D;
+    for (let j = 0; j < D; j++) mean += X.data[off + j];
+    mean /= D;
+    let vr = 0; for (let j = 0; j < D; j++) { const d = X.data[off + j] - mean; vr += d * d; } vr /= D;
+    const s = Math.sqrt(vr + eps); std[i] = s;
+    for (let j = 0; j < D; j++) norm.data[off + j] = (X.data[off + j] - mean) / s;
+  }
+  const out = T(Tr, D);
+  for (let i = 0; i < Tr; i++) { const off = i * D; for (let j = 0; j < D; j++) out.data[off + j] = norm.data[off + j] * gamma.data[j] + beta.data[j]; }
+  return { out, cache: { norm, std, D } };
+}
+function lnBackward(dOut, cache, gamma) {
+  const { norm, std, D } = cache; const Tr = dOut.rows;
+  const dX = T(Tr, D); const dGamma = new Float32Array(D), dBeta = new Float32Array(D);
+  for (let i = 0; i < Tr; i++) {
+    const off = i * D; let meanDN = 0, meanDNnorm = 0; const dnorm = new Float32Array(D);
+    for (let j = 0; j < D; j++) {
+      const d = dOut.data[off + j];
+      dGamma[j] += d * norm.data[off + j]; dBeta[j] += d;
+      const dn = d * gamma.data[j]; dnorm[j] = dn; meanDN += dn; meanDNnorm += dn * norm.data[off + j];
+    }
+    meanDN /= D; meanDNnorm /= D; const s = std[i];
+    for (let j = 0; j < D; j++) dX.data[off + j] = (dnorm[j] - meanDN - norm.data[off + j] * meanDNnorm) / s;
+  }
+  return { dX, dGamma, dBeta };
+}
+function linearForward(X, layer) { const Y = matmul(X, layer.W); addRowVec(Y, layer.b.data); return Y; }
+function linearBackward(dY, X, layer) {
+  const Xt = transpose(X); const gW = matmul(Xt, dY);
+  addInto(layer.W.grad, gW.data);
+  for (let i = 0; i < dY.rows; i++) { const off = i * dY.cols; for (let j = 0; j < dY.cols; j++) layer.b.grad[j] += dY.data[off + j]; }
+  const Wt = transpose(layer.W);
+  return matmul(dY, Wt);
+}
+function reluFwd(X) { const out = T(X.rows, X.cols); for (let i = 0; i < X.data.length; i++) out.data[i] = X.data[i] > 0 ? X.data[i] : 0; return out; }
+function reluBwd(dOut, preAct) { const out = T(dOut.rows, dOut.cols); for (let i = 0; i < dOut.data.length; i++) out.data[i] = preAct.data[i] > 0 ? dOut.data[i] : 0; return out; }
+function softmaxRow(row, out, off, len) {
+  let mx = -Infinity; for (let j = 0; j < len; j++) mx = Math.max(mx, row[off + j]);
+  let sum = 0; for (let j = 0; j < len; j++) { const e = Math.exp(row[off + j] - mx); out[off + j] = e; sum += e; }
+  for (let j = 0; j < len; j++) out[off + j] /= sum;
+}
+
+/* ---------- Transformer model ---------- */
+class NovaModel {
+  constructor(vocabSize, cfg) {
+    this.cfg = Object.assign({ dModel: 48, nHeads: 4, nLayers: 2, dFF: 192, ctxLen: 64 }, cfg);
+    this.vocabSize = vocabSize;
+    PARAMS = [];
+    const d = this.cfg.dModel;
+    this.wte = newTensorParam(vocabSize, d, 0.02);
+    this.wpe = newTensorParam(this.cfg.ctxLen, d, 0.02);
+    this.layers = [];
+    for (let l = 0; l < this.cfg.nLayers; l++) {
+      this.layers.push({
+        ln1: { gamma: newVecParam(d, 1), beta: newVecParam(d, 0) },
+        wq: { W: newTensorParam(d, d, Math.sqrt(1 / d)), b: newVecParam(d, 0) },
+        wk: { W: newTensorParam(d, d, Math.sqrt(1 / d)), b: newVecParam(d, 0) },
+        wv: { W: newTensorParam(d, d, Math.sqrt(1 / d)), b: newVecParam(d, 0) },
+        wo: { W: newTensorParam(d, d, Math.sqrt(1 / d)), b: newVecParam(d, 0) },
+        ln2: { gamma: newVecParam(d, 1), beta: newVecParam(d, 0) },
+        w1: { W: newTensorParam(d, this.cfg.dFF, Math.sqrt(2 / d)), b: newVecParam(this.cfg.dFF, 0) },
+        w2: { W: newTensorParam(this.cfg.dFF, d, Math.sqrt(2 / this.cfg.dFF)), b: newVecParam(d, 0) },
+      });
+    }
+    this.lnf = { gamma: newVecParam(d, 1), beta: newVecParam(d, 0) };
+    this.params = PARAMS;
+    this.stepCount = 0; this.epochsDone = 0;
+  }
+  paramCount() { return this.params.reduce((s, p) => s + p.data.length, 0); }
+  useParams() { PARAMS = this.params; }
+
+  forward(ids, needCache) {
+    const Tn = ids.length, d = this.cfg.dModel;
+    const X0 = T(Tn, d);
+    for (let t = 0; t < Tn; t++) {
+      const tokOff = ids[t] * d, posOff = t * d, outOff = t * d;
+      for (let k = 0; k < d; k++) X0.data[outOff + k] = this.wte.data[tokOff + k] + this.wpe.data[posOff + k];
+    }
+    let X = X0; const layerCaches = [];
+    const H = this.cfg.nHeads, hd = d / H, scale = 1 / Math.sqrt(hd);
+    for (const layer of this.layers) {
+      const ln1 = lnForward(X, layer.ln1.gamma, layer.ln1.beta);
+      const Xn = ln1.out;
+      const Q = linearForward(Xn, layer.wq), K = linearForward(Xn, layer.wk), V = linearForward(Xn, layer.wv);
+      const Ocat = T(Tn, d); const headCaches = [];
+      for (let h = 0; h < H; h++) {
+        const Qh = sliceCols(Q, h * hd, hd), Kh = sliceCols(K, h * hd, hd), Vh = sliceCols(V, h * hd, hd);
+        const scores = matmulT(Qh, Kh);
+        for (let i = 0; i < scores.data.length; i++) scores.data[i] *= scale;
+        for (let i = 0; i < Tn; i++) for (let j = i + 1; j < Tn; j++) scores.data[i * Tn + j] = -1e9;
+        const attnw = T(Tn, Tn);
+        for (let i = 0; i < Tn; i++) softmaxRow(scores.data, attnw.data, i * Tn, Tn);
+        const Oh = matmul(attnw, Vh);
+        setCols(Ocat, h * hd, Oh);
+        headCaches.push({ Qh, Kh, Vh, attnw });
+      }
+      const Y = linearForward(Ocat, layer.wo);
+      const X2 = T(Tn, d); for (let i = 0; i < X2.data.length; i++) X2.data[i] = X.data[i] + Y.data[i];
+      const ln2 = lnForward(X2, layer.ln2.gamma, layer.ln2.beta);
+      const X2n = ln2.out;
+      const FF1 = linearForward(X2n, layer.w1);
+      const Hact = reluFwd(FF1);
+      const FF2 = linearForward(Hact, layer.w2);
+      const X3 = T(Tn, d); for (let i = 0; i < X3.data.length; i++) X3.data[i] = X2.data[i] + FF2.data[i];
+      layerCaches.push({ X, Xn, ln1cache: ln1.cache, Q, K, V, headCaches, Ocat, Y, X2, ln2cache: ln2.cache, X2n, FF1, Hact, FF2 });
+      X = X3;
+    }
+    const lnf = lnForward(X, this.lnf.gamma, this.lnf.beta);
+    const Xf = lnf.out;
+    const logits = matmulT(Xf, this.wte);
+    if (!needCache) return { logits };
+    return { logits, cache: { X0, layerCaches, Xf, lnfCache: lnf.cache, ids } };
+  }
+
+  backward(dLogits, cache) {
+    const d = this.cfg.dModel, H = this.cfg.nHeads, hd = d / H, scale = 1 / Math.sqrt(hd);
+    const Tn = cache.ids.length;
+    const dXf = matmul(dLogits, this.wte);
+    const dWteFromHead = matmul(transpose(dLogits), cache.Xf);
+    addInto(this.wte.grad, dWteFromHead.data);
+    const lnfB = lnBackward(dXf, cache.lnfCache, this.lnf.gamma);
+    addInto(this.lnf.gamma.grad, lnfB.dGamma); addInto(this.lnf.beta.grad, lnfB.dBeta);
+    let dX = lnfB.dX;
+    for (let li = this.layers.length - 1; li >= 0; li--) {
+      const layer = this.layers[li], c = cache.layerCaches[li];
+      const dX3 = dX; const dX2_direct = dX3; const dFF2 = dX3;
+      const dHact = linearBackward(dFF2, c.Hact, layer.w2);
+      const dFF1 = reluBwd(dHact, c.FF1);
+      const dX2n = linearBackward(dFF1, c.X2n, layer.w1);
+      const ln2B = lnBackward(dX2n, c.ln2cache, layer.ln2.gamma);
+      addInto(layer.ln2.gamma.grad, ln2B.dGamma); addInto(layer.ln2.beta.grad, ln2B.dBeta);
+      const dX2 = T(Tn, d);
+      for (let i = 0; i < dX2.data.length; i++) dX2.data[i] = dX2_direct.data[i] + ln2B.dX.data[i];
+      const dX_direct = dX2; const dY = dX2;
+      const dOcat = linearBackward(dY, c.Ocat, layer.wo);
+      const dQ = T(Tn, d), dK = T(Tn, d), dV = T(Tn, d);
+      for (let h = 0; h < H; h++) {
+        const hc = c.headCaches[h];
+        const dOh = sliceCols(dOcat, h * hd, hd);
+        const dattnw = matmulT(dOh, hc.Vh);
+        const dVh = matmul(transpose(hc.attnw), dOh);
+        const dscores = T(Tn, Tn);
+        for (let i = 0; i < Tn; i++) {
+          let s = 0; const off = i * Tn;
+          for (let j = 0; j < Tn; j++) s += dattnw.data[off + j] * hc.attnw.data[off + j];
+          for (let j = 0; j < Tn; j++) dscores.data[off + j] = hc.attnw.data[off + j] * (dattnw.data[off + j] - s) * scale;
+        }
+        const dQh = matmul(dscores, hc.Kh);
+        const dKh = matmul(transpose(dscores), hc.Qh);
+        addCols(dQ, h * hd, dQh); addCols(dK, h * hd, dKh); addCols(dV, h * hd, dVh);
+      }
+      const dXn_q = linearBackward(dQ, c.Xn, layer.wq);
+      const dXn_k = linearBackward(dK, c.Xn, layer.wk);
+      const dXn_v = linearBackward(dV, c.Xn, layer.wv);
+      const dXnTotal = T(Tn, d);
+      for (let i = 0; i < dXnTotal.data.length; i++) dXnTotal.data[i] = dXn_q.data[i] + dXn_k.data[i] + dXn_v.data[i];
+      const ln1B = lnBackward(dXnTotal, c.ln1cache, layer.ln1.gamma);
+      addInto(layer.ln1.gamma.grad, ln1B.dGamma); addInto(layer.ln1.beta.grad, ln1B.dBeta);
+      const dXtotal = T(Tn, d);
+      for (let i = 0; i < dXtotal.data.length; i++) dXtotal.data[i] = dX_direct.data[i] + ln1B.dX.data[i];
+      dX = dXtotal;
+    }
+    for (let t = 0; t < Tn; t++) {
+      const tokOff = cache.ids[t] * d, posOff = t * d, srcOff = t * d;
+      for (let k = 0; k < d; k++) { this.wte.grad[tokOff + k] += dX.data[srcOff + k]; this.wpe.grad[posOff + k] += dX.data[srcOff + k]; }
+    }
+  }
+
+  trainStep(batchInputs, batchTargets, lr) {
+    this.useParams(); zeroGrads(this.params);
+    let totalLoss = 0, totalTokens = 0;
+    for (let b = 0; b < batchInputs.length; b++) {
+      const ids = batchInputs[b], targets = batchTargets[b];
+      const { logits, cache } = this.forward(ids, true);
+      const Tn = ids.length, V = this.vocabSize;
+      const probs = new Float32Array(Tn * V);
+      for (let i = 0; i < Tn; i++) softmaxRow(logits.data, probs, i * V, V);
+      const dLogits = T(Tn, V);
+      for (let i = 0; i < Tn; i++) {
+        const off = i * V, tgt = targets[i];
+        let p = probs[off + tgt]; if (p < 1e-9) p = 1e-9;
+        totalLoss += -Math.log(p); totalTokens++;
+        for (let j = 0; j < V; j++) dLogits.data[off + j] = probs[off + j];
+        dLogits.data[off + tgt] -= 1;
+      }
+      for (let i = 0; i < dLogits.data.length; i++) dLogits.data[i] /= Tn;
+      this.backward(dLogits, cache);
+    }
+    const bs = batchInputs.length;
+    for (const p of this.params) for (let i = 0; i < p.grad.length; i++) p.grad[i] /= bs;
+    this.stepCount++;
+    adamStep(this.params, lr, this.stepCount);
+    return totalLoss / totalTokens;
+  }
+
+  evalLoss(batchInputs, batchTargets) {
+    this.useParams();
+    let totalLoss = 0, totalTokens = 0;
+    for (let b = 0; b < batchInputs.length; b++) {
+      const ids = batchInputs[b], targets = batchTargets[b];
+      const { logits } = this.forward(ids, false);
+      const Tn = ids.length, V = this.vocabSize;
+      for (let i = 0; i < Tn; i++) {
+        const rowProbs = new Float32Array(V);
+        softmaxRow(logits.data, rowProbs, i * V, V);
+        let p = rowProbs[targets[i]]; if (p < 1e-9) p = 1e-9;
+        totalLoss += -Math.log(p); totalTokens++;
+      }
+    }
+    return totalTokens ? totalLoss / totalTokens : 0;
+  }
+
+  generate(promptIds, maxTokens, temperature, topK, topP, stopFlag) {
+    this.useParams();
+    let ids = promptIds.slice();
+    const ctx = this.cfg.ctxLen;
+    for (let step = 0; step < maxTokens; step++) {
+      if (stopFlag && stopFlag.stop) break;
+      const windowIds = ids.slice(Math.max(0, ids.length - ctx));
+      const { logits } = this.forward(windowIds, false);
+      const Tn = windowIds.length, V = this.vocabSize;
+      const lastOff = (Tn - 1) * V;
+      const scaled = new Float32Array(V);
+      for (let j = 0; j < V; j++) scaled[j] = logits.data[lastOff + j] / Math.max(temperature, 1e-6);
+      const probs = new Float32Array(V);
+      softmaxRow(scaled, probs, 0, V);
+      let idxs = Array.from({ length: V }, (_, i) => i).sort((a, b) => probs[b] - probs[a]);
+      if (topK && topK > 0) idxs = idxs.slice(0, topK);
+      if (topP && topP < 1) { let cum = 0; const kept = []; for (const i of idxs) { cum += probs[i]; kept.push(i); if (cum >= topP) break; } idxs = kept; }
+      let sum = 0; for (const i of idxs) sum += probs[i];
+      let r = Math.random() * sum, chosen = idxs[idxs.length - 1];
+      for (const i of idxs) { r -= probs[i]; if (r <= 0) { chosen = i; break; } }
+      ids.push(chosen);
+      if (this.eosId !== undefined && chosen === this.eosId) break;
+    }
+    return ids;
+  }
+
+  serializeWeights() {
+    const out = {};
+    out.wte = Array.from(this.wte.data);
+    out.wpe = Array.from(this.wpe.data);
+    out.layers = this.layers.map(l => ({
+      ln1: { gamma: Array.from(l.ln1.gamma.data), beta: Array.from(l.ln1.beta.data) },
+      wq: { W: Array.from(l.wq.W.data), b: Array.from(l.wq.b.data) },
+      wk: { W: Array.from(l.wk.W.data), b: Array.from(l.wk.b.data) },
+      wv: { W: Array.from(l.wv.W.data), b: Array.from(l.wv.b.data) },
+      wo: { W: Array.from(l.wo.W.data), b: Array.from(l.wo.b.data) },
+      ln2: { gamma: Array.from(l.ln2.gamma.data), beta: Array.from(l.ln2.beta.data) },
+      w1: { W: Array.from(l.w1.W.data), b: Array.from(l.w1.b.data) },
+      w2: { W: Array.from(l.w2.W.data), b: Array.from(l.w2.b.data) },
+    }));
+    out.lnf = { gamma: Array.from(this.lnf.gamma.data), beta: Array.from(this.lnf.beta.data) };
+    return out;
+  }
+  loadWeights(w) {
+    this.wte.data.set(w.wte); this.wpe.data.set(w.wpe);
+    w.layers.forEach((lw, i) => {
+      const l = this.layers[i];
+      l.ln1.gamma.data.set(lw.ln1.gamma); l.ln1.beta.data.set(lw.ln1.beta);
+      l.wq.W.data.set(lw.wq.W); l.wq.b.data.set(lw.wq.b);
+      l.wk.W.data.set(lw.wk.W); l.wk.b.data.set(lw.wk.b);
+      l.wv.W.data.set(lw.wv.W); l.wv.b.data.set(lw.wv.b);
+      l.wo.W.data.set(lw.wo.W); l.wo.b.data.set(lw.wo.b);
+      l.ln2.gamma.data.set(lw.ln2.gamma); l.ln2.beta.data.set(lw.ln2.beta);
+      l.w1.W.data.set(lw.w1.W); l.w1.b.data.set(lw.w1.b);
+      l.w2.W.data.set(lw.w2.W); l.w2.b.data.set(lw.w2.b);
+    });
+    this.lnf.gamma.data.set(w.lnf.gamma); this.lnf.beta.data.set(w.lnf.beta);
+  }
+}
+
+/* =========================================================================
+   Application state & UI glue
+   ========================================================================= */
+const state = {
+  datasets: [],       // {name, text}
+  tokenizer: null,
+  model: null,
+  memory: [],          // {id, text, ts}
+  conversation: [],     // {role, text}
+  trainStopFlag: { stop: false },
+  genStopFlag: { stop: false },
+  learnBeforeText: null,
+  learnBeforeWeightSample: null,
+  settings: { temperature: 0.8, topK: 30, topP: 0.9, maxTokens: 80 },
+  pulseHistory: [],
+};
+
+/* ---- checksum (FNV-1a) ---- */
+function fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
+  return h.toString(16);
+}
+
+/* ---- IndexedDB ---- */
+let dbPromise = null;
+function openDB() {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open('novaDB', 1);
+    req.onupgradeneeded = () => { req.result.createObjectStore('state'); };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return dbPromise;
+}
+async function idbSet(key, value) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('state', 'readwrite');
+    tx.objectStore('state').put(value, key);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+async function idbGet(key) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('state', 'readonly');
+    const req = tx.objectStore('state').get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbDelete(key) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('state', 'readwrite');
+    tx.objectStore('state').delete(key);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+/* ---- UI: tabs ---- */
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    document.getElementById('crumb').textContent = btn.textContent.trim();
+  });
+});
+
+/* ---- Device detection (honest: no WebGPU compute path implemented) ---- */
+document.getElementById('deviceStatus').textContent = 'DEVICE · CPU';
+document.getElementById('miDevice').textContent = navigator.gpu ? 'CPU (WebGPU detected but not used by this build)' : 'CPU';
+
+/* ---- Data tab ---- */
+function renderDatasets() {
+  const list = document.getElementById('datasetList');
+  list.innerHTML = '';
+  state.datasets.forEach((d, i) => {
+    const el = document.createElement('div'); el.className = 'datasetItem';
+    el.innerHTML = `<span>${d.name} — ${d.text.length.toLocaleString()} chars</span>`;
+    const rm = document.createElement('button'); rm.className = 'btn secondary'; rm.textContent = 'Remove';
+    rm.onclick = () => { state.datasets.splice(i, 1); renderDatasets(); };
+    el.appendChild(rm);
+    list.appendChild(el);
+  });
+  document.getElementById('datasetCount').textContent = state.datasets.length;
+  const totalChars = state.datasets.reduce((s, d) => s + d.text.length, 0);
+  document.getElementById('statChars').textContent = totalChars.toLocaleString();
+  document.getElementById('dataPreview').textContent = state.datasets.length ? state.datasets.map(d => `--- ${d.name} ---\n` + d.text.slice(0, 300)).join('\n\n') : 'No data yet.';
+}
+document.getElementById('btnAddPaste').onclick = () => {
+  const txt = document.getElementById('pasteData').value;
+  if (!txt.trim()) return;
+  state.datasets.push({ name: 'pasted-' + (state.datasets.length + 1), text: txt });
+  document.getElementById('pasteData').value = '';
+  renderDatasets();
+};
+document.getElementById('fileUpload').onchange = async (e) => {
+  for (const file of e.target.files) {
+    const text = await file.text();
+    state.datasets.push({ name: file.name, text });
+  }
+  renderDatasets();
+  e.target.value = '';
+};
+document.getElementById('btnClearDatasets').onclick = () => { if (confirm('Remove all datasets?')) { state.datasets = []; renderDatasets(); } };
+
+/* ---- Memory tab ---- */
+function renderMemory() {
+  const list = document.getElementById('memList');
+  list.innerHTML = '';
+  state.memory.forEach((m, i) => {
+    const el = document.createElement('div'); el.className = 'memItem';
+    el.innerHTML = `<span>${m.text}</span>`;
+    const rm = document.createElement('button'); rm.className = 'btn secondary'; rm.textContent = 'Delete';
+    rm.onclick = () => { state.memory.splice(i, 1); renderMemory(); };
+    el.appendChild(rm);
+    list.appendChild(el);
+  });
+  document.getElementById('memCount').textContent = state.memory.length;
+}
+document.getElementById('btnSaveMemory').onclick = () => {
+  const txt = document.getElementById('memInput').value.trim();
+  if (!txt) return;
+  state.memory.push({ id: Date.now(), text: txt, ts: new Date().toISOString() });
+  document.getElementById('memInput').value = '';
+  renderMemory();
+};
+document.getElementById('btnDeleteMemory').onclick = () => { if (confirm('Delete all memory?')) { state.memory = []; renderMemory(); } };
+document.getElementById('btnDownloadMemory').onclick = () => {
+  downloadJSON({ format: 'nova-memory', version: 1, memory: state.memory }, 'nova-memory.json');
+};
+document.getElementById('btnImportMemory').onclick = () => document.getElementById('memImportFile').click();
+document.getElementById('memImportFile').onchange = async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  try {
+    const obj = JSON.parse(await file.text());
+    if (!obj.memory || !Array.isArray(obj.memory)) throw new Error('Invalid memory file');
+    state.memory = state.memory.concat(obj.memory);
+    renderMemory();
+    alert('Memory imported (' + obj.memory.length + ' entries).');
+  } catch (err) { alert('Import failed: ' + err.message); }
+  e.target.value = '';
+};
+
+/* Retrieve relevant memory as internal context only (simple keyword overlap) */
+function retrieveMemory(query) {
+  if (!state.memory.length) return [];
+  const qWords = new Set(query.toLowerCase().match(/[a-z0-9]+/g) || []);
+  const scored = state.memory.map(m => {
+    const mWords = m.text.toLowerCase().match(/[a-z0-9]+/g) || [];
+    let score = 0; for (const w of mWords) if (qWords.has(w)) score++;
+    return { m, score };
+  }).filter(s => s.score > 0).sort((a, b) => b.score - a.score);
+  return scored.slice(0, 3).map(s => s.m.text);
+}
+
+/* ---- Model init / info ---- */
+function updateModelInfo() {
+  const m = state.model;
+  if (!m) {
+    document.getElementById('miArch').textContent = '—';
+    document.getElementById('miParams').textContent = '—';
+    document.getElementById('miVocab').textContent = '—';
+    document.getElementById('miCtx').textContent = '—';
+    document.getElementById('modelStatus').textContent = 'MODEL · NONE';
+    return;
+  }
+  document.getElementById('miArch').textContent = `Transformer (${m.cfg.nLayers}L, ${m.cfg.nHeads}H, d=${m.cfg.dModel}, ff=${m.cfg.dFF})`;
+  document.getElementById('miParams').textContent = m.paramCount().toLocaleString();
+  document.getElementById('miVocab').textContent = m.vocabSize.toLocaleString();
+  document.getElementById('miCtx').textContent = m.cfg.ctxLen;
+  document.getElementById('miSteps').textContent = m.stepCount.toLocaleString();
+  document.getElementById('miEpochs').textContent = m.epochsDone;
+  document.getElementById('modelStatus').textContent = `MODEL · ${m.paramCount().toLocaleString()} PARAMS`;
+  document.getElementById('statVocabSize').textContent = m.vocabSize.toLocaleString();
+}
+document.getElementById('btnInitModel').onclick = () => {
+  if (!state.datasets.length) { alert('Add training data first (Data tab).'); return; }
+  if (state.model && !confirm('This resets all learned weights. Continue?')) return;
+  const combinedText = state.datasets.map(d => d.text).join('\n');
+  const tokenizer = new BPETokenizer();
+  const targetVocab = parseInt(document.getElementById('cfgVocab').value) || 1500;
+  tokenizer.train(combinedText, targetVocab);
+  const cfg = {
+    dModel: parseInt(document.getElementById('cfgDModel').value) || 48,
+    nHeads: parseInt(document.getElementById('cfgHeads').value) || 4,
+    nLayers: parseInt(document.getElementById('cfgLayers').value) || 2,
+    dFF: (parseInt(document.getElementById('cfgDModel').value) || 48) * 4,
+    ctxLen: parseInt(document.getElementById('cfgCtx').value) || 64,
+  };
+  state.tokenizer = tokenizer;
+  state.model = new NovaModel(tokenizer.size, cfg);
+  state.model.eosId = tokenizer.vocab['<EOS>'];
+  updateModelInfo();
+  document.getElementById('miCheckpoint').textContent = 'Fresh (not saved)';
+  alert(`Model initialized. Vocabulary: ${tokenizer.size.toLocaleString()} tokens. Parameters: ${state.model.paramCount().toLocaleString()}.`);
+};
+
+/* ---- Training ---- */
+function buildTokenStream() {
+  const combinedText = state.datasets.map(d => d.text).join('\n');
+  return state.tokenizer.encode(combinedText, true, true);
+}
+let trainingActive = false;
+document.getElementById('btnStartTrain').onclick = async () => {
+  if (!state.model || !state.tokenizer) { alert('Initialize the model first.'); return; }
+  if (trainingActive) return;
+  const tokens = buildTokenStream();
+  const ctx = state.model.cfg.ctxLen;
+  if (tokens.length < ctx + 2) { alert('Not enough training data for this context length.'); return; }
+  const splitIdx = Math.floor(tokens.length * 0.9);
+  const trainTokens = tokens.slice(0, splitIdx);
+  const valTokens = tokens.slice(splitIdx);
+  const epochs = parseInt(document.getElementById('cfgEpochs').value) || 10;
+  const batchSize = parseInt(document.getElementById('cfgBatch').value) || 4;
+  const lr = parseFloat(document.getElementById('cfgLR').value) || 0.003;
+  const stepsPerEpoch = Math.max(1, Math.floor(trainTokens.length / (batchSize * ctx)));
+  const totalSteps = epochs * stepsPerEpoch;
+
+  function sampleBatch(tokArr) {
+    const inputs = [], targets = [];
+    for (let b = 0; b < batchSize; b++) {
+      const maxStart = tokArr.length - ctx - 1;
+      const start = Math.floor(Math.random() * Math.max(1, maxStart));
+      inputs.push(tokArr.slice(start, start + ctx));
+      targets.push(tokArr.slice(start + 1, start + ctx + 1));
+    }
+    return [inputs, targets];
+  }
+
+  trainingActive = true; state.trainStopFlag.stop = false; state.pulseHistory = [];
+  document.getElementById('btnStartTrain').disabled = true;
+  document.getElementById('btnStopTrain').disabled = false;
+  document.getElementById('btnInitModel').disabled = true;
+
+  let globalStep = 0;
+  try {
+    for (let epoch = 1; epoch <= epochs; epoch++) {
+      if (state.trainStopFlag.stop) break;
+      state.model.epochsDone = epoch - 1;
+      for (let s = 1; s <= stepsPerEpoch; s++) {
+        if (state.trainStopFlag.stop) break;
+        globalStep++;
+        const [bi, bt] = sampleBatch(trainTokens);
+        const loss = state.model.trainStep(bi, bt, lr);
+        state.pulseHistory.push(loss);
+        if (state.pulseHistory.length > 80) state.pulseHistory.shift();
+        if (globalStep % 5 === 0 || globalStep === totalSteps) {
+          document.getElementById('statEpoch').textContent = `${epoch} / ${epochs}`;
+          document.getElementById('statStep').textContent = globalStep.toLocaleString();
+          document.getElementById('statTrainLoss').textContent = loss.toFixed(4);
+          document.getElementById('trainProgressBar').style.width = (100 * globalStep / totalSteps).toFixed(1) + '%';
+          document.getElementById('miLoss').textContent = loss.toFixed(4);
+          document.getElementById('miSteps').textContent = state.model.stepCount.toLocaleString();
+        }
+        if (globalStep % 25 === 0 || s === stepsPerEpoch) {
+          const [vi, vt] = sampleBatch(valTokens.length > ctx + 1 ? valTokens : trainTokens);
+          const vloss = state.model.evalLoss(vi, vt);
+          document.getElementById('statValLoss').textContent = vloss.toFixed(4);
+          document.getElementById('miValLoss').textContent = vloss.toFixed(4);
+        }
+        if (globalStep % 25 === 0) await new Promise(r => requestAnimationFrame(r)); // yield only occasionally, no artificial delay
+      }
+      state.model.epochsDone = epoch;
+      document.getElementById('miEpochs').textContent = state.model.epochsDone;
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Training stopped due to an error at step ' + globalStep + ':\n' + err.message);
+  } finally {
+    trainingActive = false;
+    document.getElementById('btnStartTrain').disabled = false;
+    document.getElementById('btnStopTrain').disabled = true;
+    document.getElementById('btnInitModel').disabled = false;
+  }
+  if (document.getElementById('setAutoSave').checked) await saveModelToIDB();
+};
+document.getElementById('btnStopTrain').onclick = () => { state.trainStopFlag.stop = true; };
+
+/* ---- Learning test ---- */
+document.getElementById('btnSnapshotBefore').onclick = () => {
+  if (!state.model) { alert('Initialize a model first.'); return; }
+  const prompt = document.getElementById('learnTestPrompt').value;
+  const ids = state.tokenizer.encode(prompt);
+  const out = state.model.generate(ids, 20, 0.8, 20, 0.9, { stop: false });
+  state.learnBeforeText = state.tokenizer.decode(out);
+  state.learnBeforeWeightSample = state.model.layers[0].wq.W.data.slice(0, 12);
+  document.getElementById('learnBefore').textContent = state.learnBeforeText;
+  document.getElementById('learnAfter').textContent = '—';
+  document.getElementById('learnChanged').textContent = '—';
+};
+document.getElementById('btnCompareAfter').onclick = () => {
+  if (!state.model || state.learnBeforeText === null) { alert('Take a "before" snapshot first, then train, then compare.'); return; }
+  const prompt = document.getElementById('learnTestPrompt').value;
+  const ids = state.tokenizer.encode(prompt);
+  const out = state.model.generate(ids, 20, 0.8, 20, 0.9, { stop: false });
+  const afterText = state.tokenizer.decode(out);
+  document.getElementById('learnAfter').textContent = afterText;
+  let changed = false;
+  const cur = state.model.layers[0].wq.W.data;
+  for (let i = 0; i < state.learnBeforeWeightSample.length; i++) if (Math.abs(cur[i] - state.learnBeforeWeightSample[i]) > 1e-7) changed = true;
+  document.getElementById('learnChanged').textContent = changed ? 'YES' : 'NO';
+};
+
+/* ---- Chat ---- */
+function escapeHTML(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function renderMessageContent(container, text, codingMode) {
+  const codeBlockRe = /```(\w*)\n([\s\S]*?)```/g;
+  let lastIndex = 0, m;
+  let found = false;
+  while ((m = codeBlockRe.exec(text)) !== null) {
+    found = true;
+    if (m.index > lastIndex) container.appendChild(document.createTextNode(text.slice(lastIndex, m.index)));
+    const lang = m[1] || 'text';
+    const pre = document.createElement('pre');
+    const tag = document.createElement('span'); tag.className = 'langtag'; tag.textContent = lang;
+    const codeEl = document.createElement('code'); codeEl.textContent = m[2];
+    const copyBtn = document.createElement('button'); copyBtn.className = 'copybtn'; copyBtn.textContent = 'Copy';
+    copyBtn.onclick = () => { navigator.clipboard.writeText(m[2]); copyBtn.textContent = 'Copied'; setTimeout(() => copyBtn.textContent = 'Copy', 1200); };
+    pre.appendChild(tag); pre.appendChild(codeEl); pre.appendChild(copyBtn);
+    container.appendChild(pre);
+    lastIndex = codeBlockRe.lastIndex;
+  }
+  if (lastIndex < text.length) container.appendChild(document.createTextNode(text.slice(lastIndex)));
+  if (!found && codingMode) {
+    // heuristically wrap likely code in a block if coding mode is on and no fences were given
+  }
+}
+function addMessage(role, text) {
+  const div = document.createElement('div'); div.className = 'msg ' + (role === 'user' ? 'user' : 'nova');
+  renderMessageContent(div, text, document.getElementById('codingMode').checked);
+  document.getElementById('chatMessages').appendChild(div);
+  document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+  return div;
+}
+async function runGeneration(promptText) {
+  if (!state.model || !state.tokenizer) { addMessage('nova', 'Nova has no trained model yet. Go to the Train tab, add data in Data, then Initialize and Start Training.'); return; }
+  const relevantMemory = retrieveMemory(promptText);
+  const historyText = state.conversation.slice(-6).map(c => (c.role === 'user' ? 'User: ' : 'Nova: ') + c.text).join('\n');
+  const memContext = relevantMemory.length ? relevantMemory.join(' ') + '\n' : '';
+  const fullPrompt = memContext + historyText + '\nUser: ' + promptText + '\nNova:';
+  const ids = state.tokenizer.encode(fullPrompt);
+  const maxTok = parseInt(document.getElementById('setMaxTok').value) || state.settings.maxTokens;
+  const temp = parseFloat(document.getElementById('setTemp').value) || state.settings.temperature;
+  const topK = parseInt(document.getElementById('setTopK').value) || state.settings.topK;
+  const topP = parseFloat(document.getElementById('setTopP').value) || state.settings.topP;
+  state.genStopFlag.stop = false;
+  document.getElementById('btnStopGen').disabled = false;
+  const outIds = state.model.generate(ids, maxTok, temp, topK, topP, state.genStopFlag);
+  document.getElementById('btnStopGen').disabled = true;
+  const newIds = outIds.slice(ids.length);
+  let text = state.tokenizer.decode(newIds);
+  const cutAt = text.indexOf('\nUser:');
+  if (cutAt >= 0) text = text.slice(0, cutAt);
+  return text.trim() || '(generated empty output — try training for more steps)';
+}
+document.getElementById('btnSend').onclick = async () => {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addMessage('user', text);
+  state.conversation.push({ role: 'user', text });
+  try {
+    const reply = await runGeneration(text);
+    addMessage('nova', reply);
+    state.conversation.push({ role: 'nova', text: reply });
+  } catch (err) {
+    console.error(err);
+    addMessage('nova', '(generation error: ' + err.message + ')');
+  }
+};
+document.getElementById('chatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('btnSend').click(); } });
+document.getElementById('btnStopGen').onclick = () => { state.genStopFlag.stop = true; };
+document.getElementById('btnClearChat').onclick = () => { if (confirm('Clear conversation? (This does not affect trained weights.)')) { state.conversation = []; document.getElementById('chatMessages').innerHTML = ''; } };
+document.getElementById('btnRegenerate').onclick = async () => {
+  const lastUser = [...state.conversation].reverse().find(c => c.role === 'user');
+  if (!lastUser) return;
+  const reply = await runGeneration(lastUser.text);
+  addMessage('nova', reply);
+  state.conversation.push({ role: 'nova', text: reply });
+};
+
+/* ---- Model save/load/export/import ---- */
+function downloadJSON(obj, filename) {
+  const str = JSON.stringify(obj);
+  const blob = new Blob([str], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+async function saveModelToIDB() {
+  if (!state.model) { alert('No model to save.'); return; }
+  const payload = {
+    config: state.model.cfg,
+    vocabSize: state.model.vocabSize,
+    weights: state.model.serializeWeights(),
+    tokenizer: state.tokenizer.toJSON(),
+    stepCount: state.model.stepCount,
+    epochsDone: state.model.epochsDone,
+    savedAt: new Date().toISOString(),
+  };
+  await idbSet('model', payload);
+  document.getElementById('miCheckpoint').textContent = 'Saved ' + new Date().toLocaleTimeString();
+  alert('Model saved locally (IndexedDB).');
+}
+document.getElementById('btnSaveModel').onclick = saveModelToIDB;
+document.getElementById('btnLoadModel').onclick = async () => {
+  const payload = await idbGet('model');
+  if (!payload) { alert('No saved model found.'); return; }
+  try {
+    state.tokenizer = BPETokenizer.fromJSON(payload.tokenizer);
+    state.model = new NovaModel(payload.vocabSize, payload.config);
+    state.model.loadWeights(payload.weights);
+    state.model.stepCount = payload.stepCount || 0;
+    state.model.epochsDone = payload.epochsDone || 0;
+    state.model.eosId = state.tokenizer.vocab['<EOS>'];
+    updateModelInfo();
+    document.getElementById('miCheckpoint').textContent = 'Loaded (saved ' + (payload.savedAt || 'unknown') + ')';
+    alert('Model loaded.');
+  } catch (err) { alert('Failed to load model: ' + err.message); }
+};
+document.getElementById('btnDeleteModel').onclick = async () => {
+  if (!confirm('Delete the locally saved model? This cannot be undone.')) return;
+  await idbDelete('model');
+  document.getElementById('miCheckpoint').textContent = 'No saved model';
+  alert('Local saved model deleted. (Current in-memory model is untouched until you reload the page.)');
+};
+document.getElementById('btnExportModel').onclick = () => {
+  if (!state.model) { alert('No model to export.'); return; }
+  const payload = {
+    format: 'nova-model', version: 1, createdAt: new Date().toISOString(),
+    config: state.model.cfg, vocabSize: state.model.vocabSize,
+    weights: state.model.serializeWeights(), tokenizer: state.tokenizer.toJSON(),
+    stepCount: state.model.stepCount, epochsDone: state.model.epochsDone,
+  };
+  payload.checksum = fnv1a(JSON.stringify(payload.weights) + JSON.stringify(payload.tokenizer));
+  downloadJSON(payload, 'nova-model.json');
+};
+document.getElementById('btnImportModel').onclick = () => document.getElementById('modelImportFile').click();
+document.getElementById('modelImportFile').onchange = async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  try {
+    const obj = JSON.parse(await file.text());
+    if (obj.format !== 'nova-model') throw new Error('Not a Nova model file');
+    const expectedChecksum = fnv1a(JSON.stringify(obj.weights) + JSON.stringify(obj.tokenizer));
+    if (obj.checksum && obj.checksum !== expectedChecksum) throw new Error('Checksum mismatch — file may be corrupted');
+    if (!obj.weights || !obj.tokenizer || !obj.config) throw new Error('Missing required fields');
+    const tokenizer = BPETokenizer.fromJSON(obj.tokenizer);
+    const model = new NovaModel(obj.vocabSize, obj.config);
+    model.loadWeights(obj.weights);
+    model.stepCount = obj.stepCount || 0; model.epochsDone = obj.epochsDone || 0;
+    model.eosId = tokenizer.vocab['<EOS>'];
+    state.tokenizer = tokenizer; state.model = model;
+    updateModelInfo();
+    document.getElementById('miCheckpoint').textContent = 'Imported model';
+    alert('Model imported successfully.');
+  } catch (err) { alert('Import failed — keeping current model intact.\n' + err.message); }
+  e.target.value = '';
+};
+
+/* ---- Full backup ---- */
+document.getElementById('btnExportFull').onclick = () => {
+  const payload = {
+    format: 'nova-ai-backup', version: 1, createdAt: new Date().toISOString(),
+    model: state.model ? {
+      architecture: 'transformer', config: state.model.cfg, vocabSize: state.model.vocabSize,
+      weights: state.model.serializeWeights(), stepCount: state.model.stepCount, epochsDone: state.model.epochsDone,
+    } : null,
+    tokenizer: state.tokenizer ? state.tokenizer.toJSON() : null,
+    training: { steps: state.model ? state.model.stepCount : 0, epochs: state.model ? state.model.epochsDone : 0 },
+    memory: state.memory,
+    conversationHistory: state.conversation,
+    settings: {
+      temperature: parseFloat(document.getElementById('setTemp').value),
+      topK: parseInt(document.getElementById('setTopK').value),
+      topP: parseFloat(document.getElementById('setTopP').value),
+      maxTokens: parseInt(document.getElementById('setMaxTok').value),
+      theme: document.getElementById('setTheme').value,
+    },
+    datasets: state.datasets,
+  };
+  const withoutChecksum = JSON.stringify(payload);
+  payload.checksum = fnv1a(withoutChecksum);
+  downloadJSON(payload, 'nova-full-backup.json');
+};
+document.getElementById('btnImportFull').onclick = () => document.getElementById('fullImportFile').click();
+document.getElementById('fullImportFile').onchange = async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const validationEl = document.getElementById('backupValidation');
+  try {
+    const raw = await file.text();
+    const obj = JSON.parse(raw);
+    if (obj.format !== 'nova-ai-backup') throw new Error('Unrecognized backup format');
+    if (obj.version !== 1) throw new Error('Unsupported backup version: ' + obj.version);
+    const claimedChecksum = obj.checksum;
+    const objCopy = Object.assign({}, obj); delete objCopy.checksum;
+    const expected = fnv1a(JSON.stringify(objCopy));
+    let checksumNote = '';
+    if (claimedChecksum && claimedChecksum !== expected) checksumNote = ' (WARNING: checksum mismatch — file may be corrupted, proceeding cautiously)';
+    if (!obj.tokenizer && obj.model) throw new Error('Backup has a model but no tokenizer — cannot reconstruct');
+    // reconstruct
+    let newTokenizer = null, newModel = null;
+    if (obj.tokenizer) newTokenizer = BPETokenizer.fromJSON(obj.tokenizer);
+    if (obj.model) {
+      if (!obj.model.config || !obj.model.weights || !obj.model.vocabSize) throw new Error('Model section missing required fields');
+      newModel = new NovaModel(obj.model.vocabSize, obj.model.config);
+      newModel.loadWeights(obj.model.weights);
+      newModel.stepCount = obj.model.stepCount || 0;
+      newModel.epochsDone = obj.model.epochsDone || 0;
+      newModel.eosId = newTokenizer ? newTokenizer.vocab['<EOS>'] : undefined;
+    }
+    // all validated — now commit
+    if (newTokenizer) state.tokenizer = newTokenizer;
+    if (newModel) state.model = newModel;
+    state.memory = obj.memory || state.memory;
+    state.conversation = obj.conversationHistory || state.conversation;
+    state.datasets = obj.datasets || state.datasets;
+    if (obj.settings) {
+      document.getElementById('setTemp').value = obj.settings.temperature ?? 0.8;
+      document.getElementById('setTopK').value = obj.settings.topK ?? 30;
+      document.getElementById('setTopP').value = obj.settings.topP ?? 0.9;
+      document.getElementById('setMaxTok').value = obj.settings.maxTokens ?? 80;
+    }
+    renderDatasets(); renderMemory(); updateModelInfo();
+    document.getElementById('chatMessages').innerHTML = '';
+    state.conversation.forEach(c => addMessage(c.role === 'user' ? 'user' : 'nova', c.text));
+    validationEl.textContent = 'Valid — restored successfully' + checksumNote;
+    alert('Full backup restored.' + checksumNote);
+  } catch (err) {
+    validationEl.textContent = 'INVALID — kept current model intact (' + err.message + ')';
+    alert('Backup import failed, current model was NOT modified:\n' + err.message);
+  }
+  e.target.value = '';
+};
+
+/* ---- Diagnostics ---- */
+document.getElementById('btnRunDiagnostics').onclick = async () => {
+  const results = [];
+  function ok(name, cond, detail) { results.push({ name, pass: !!cond, detail: detail || '' }); }
+
+  ok('HTML/JS loaded', true);
+
+  try {
+    const tk = new BPETokenizer();
+    tk.train('the quick brown fox the quick fox function test() { return 1; }', 60);
+    ok('Tokenizer builds vocabulary', tk.size > 0, `vocab=${tk.size}`);
+    const ids = tk.encode('the quick fox');
+    const back = tk.decode(ids);
+    ok('Tokenizer encode/decode roundtrip', back === 'the quick fox', `got "${back}"`);
+  } catch (err) { ok('Tokenizer', false, err.message); }
+
+  ok('Dataset loading', state.datasets.length >= 0, `${state.datasets.length} dataset(s) in memory`);
+
+  let testModel;
+  try {
+    testModel = new NovaModel(60, { dModel: 16, nHeads: 2, nLayers: 1, dFF: 32, ctxLen: 16 });
+    ok('Model initialization', testModel.paramCount() > 0, `${testModel.paramCount()} params`);
+  } catch (err) { ok('Model initialization', false, err.message); }
+
+  let fwdOut;
+  try {
+    fwdOut = testModel.forward([1, 2, 3, 4, 5], true);
+    ok('Forward pass', fwdOut.logits.rows === 5 && fwdOut.logits.cols === 60);
+  } catch (err) { ok('Forward pass', false, err.message); }
+
+  let lossVal;
+  try {
+    lossVal = testModel.evalLoss([[1, 2, 3, 4]], [[2, 3, 4, 5]]);
+    ok('Loss calculation', isFinite(lossVal) && lossVal > 0, `loss=${lossVal.toFixed(3)}`);
+  } catch (err) { ok('Loss calculation', false, err.message); }
+
+  try {
+    const before = testModel.layers[0].wq.W.data.slice(0, 5);
+    const l1 = testModel.trainStep([[1, 2, 3, 4]], [[2, 3, 4, 5]], 0.01);
+    const l2 = testModel.trainStep([[1, 2, 3, 4]], [[2, 3, 4, 5]], 0.01);
+    ok('Backpropagation runs', isFinite(l1) && isFinite(l2));
+    let changed = false;
+    for (let i = 0; i < 5; i++) if (Math.abs(testModel.layers[0].wq.W.data[i] - before[i]) > 1e-8) changed = true;
+    ok('Weight updates actually change weights', changed);
+  } catch (err) { ok('Backpropagation / weight update', false, err.message); }
+
+  try {
+    const gen = testModel.generate([1, 2], 5, 0.8, 10, 0.9, { stop: false });
+    ok('Text generation', gen.length === 7);
+  } catch (err) { ok('Text generation', false, err.message); }
+
+  ok('Memory system', Array.isArray(state.memory));
+
+  try {
+    await idbSet('__diag_test__', { a: 1 });
+    const back = await idbGet('__diag_test__');
+    await idbDelete('__diag_test__');
+    ok('IndexedDB read/write', back && back.a === 1);
+  } catch (err) { ok('IndexedDB read/write', false, err.message); }
+
+  try {
+    const w = testModel.serializeWeights();
+    const clone = new NovaModel(60, testModel.cfg);
+    clone.loadWeights(w);
+    let same = true;
+    for (let i = 0; i < 10; i++) if (Math.abs(clone.wte.data[i] - testModel.wte.data[i]) > 1e-6) same = false;
+    ok('Model export (serialize weights)', true);
+    ok('Model import (load weights)', same);
+  } catch (err) { ok('Model export/import', false, err.message); }
+
+  try {
+    const backup = { format: 'nova-ai-backup', version: 1, model: null, tokenizer: null, memory: [], conversationHistory: [], settings: {}, datasets: [] };
+    backup.checksum = fnv1a(JSON.stringify(backup));
+    const str = JSON.stringify(backup);
+    const parsed = JSON.parse(str);
+    const cc = Object.assign({}, parsed); delete cc.checksum;
+    ok('Full JSON backup roundtrip', fnv1a(JSON.stringify(cc)) === parsed.checksum);
+  } catch (err) { ok('Full JSON backup roundtrip', false, err.message); }
+
+  const listEl = document.getElementById('diagResults');
+  listEl.innerHTML = '';
+  results.forEach(r => {
+    const row = document.createElement('div'); row.className = 'diagRow';
+    row.innerHTML = `<span>${r.name}${r.detail ? ' <span class="small">(' + r.detail + ')</span>' : ''}</span><span class="badge ${r.pass ? 'pass' : 'fail'}">${r.pass ? 'PASS' : 'FAIL'}</span>`;
+    listEl.appendChild(row);
+  });
+};
+
+/* ---- boot overlay: single one-time entrance, then gone ---- */
+setTimeout(() => { const b = document.getElementById('bootOverlay'); if (b) b.remove(); }, 2500);
+
+/* ---- pulse trace: a small hand-plotted graph, not a synth oscilloscope.
+   Idle = a faint graph-paper grid with a calm drifting line (nothing to report yet).
+   Training = the actual per-step loss, plotted as ruled points+segments, from real numbers
+   pushed in trainStep — not a decorative loop. ---- */
+(function () {
+  const canvas = document.getElementById('pulseCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  let t = 0;
+  function drawGrid() {
+    ctx.strokeStyle = 'rgba(33,31,22,0.08)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 12) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y < H; y += 8) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    drawGrid();
+    if (trainingActive && state.pulseHistory.length > 1) {
+      const hist = state.pulseHistory;
+      const maxL = Math.max(...hist), minL = Math.min(...hist);
+      const range = Math.max(0.0001, maxL - minL);
+      const pts = hist.map((v, i) => [(i / (hist.length - 1)) * W, H - 3 - ((v - minL) / range) * (H - 6)]);
+      ctx.beginPath();
+      pts.forEach(([x, y], i) => i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y));
+      ctx.strokeStyle = '#3C6B47';
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+      const [lx, ly] = pts[pts.length - 1];
+      ctx.fillStyle = '#3C6B47';
+      ctx.beginPath(); ctx.arc(lx, ly, 2, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 3) {
+        const y = H / 2 + Math.sin(x * 0.06 + t) * (H * 0.16);
+        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = 'rgba(37,64,143,0.5)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
+    t += 0.02;
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+/* ---- init ---- */
+renderDatasets(); renderMemory(); updateModelInfo();
+</script>
+<script>
+(function(){const sel=document.getElementById('setTheme'),apply=v=>document.body.classList.toggle('dark',v==='dark');
+let v='light';try{v=localStorage.getItem('novaTheme')||'light'}catch(e){}sel.value=v;apply(v);
+sel.addEventListener('change',()=>{apply(sel.value);try{localStorage.setItem('novaTheme',sel.value)}catch(e){}})})();
+</script>
+</body>
+</html>
