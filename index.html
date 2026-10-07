@@ -129,7 +129,7 @@ const fd=d=>d?new Date(d).toLocaleDateString(undefined,{year:'numeric',month:'sh
 const ST={active:'Active',past_due:'Past due',cancelled:'Cancelled',expired:'Expired',none:'Not subscribed'};
 const TITLES={board:'Leaderboard',models:'My models',create:'Create & deploy',test:'Test',keys:'API keys',billing:'Billing',admin:'Payment Reviews'};
 const PROTECTED=['models','create','test','keys','billing','admin'];
-let sb=null,SBURL='',S=null,A=null,models=[],pending=null,chatMsgs=[],cur='board';
+let sb=null,SBURL='',S=null,A=null,models=[],pending=null,chatMsgs=[],cur='board',sbReady=null;
 async function initSB(){
  const url=SBCFG.url,key=SBCFG.key;
  if(!url||!key)throw Error('Supabase configuration is missing.');
@@ -169,7 +169,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#dlg').classList.
 function confirmDlg(msg,fn){dlg(`<p>${msg}</p><button class="btn bad" id="xY">Confirm</button><button class="btn sec" data-x>Cancel</button>`,c=>$('#xY').onclick=safe(async()=>{await fn();c()}))}
 function needSub(){if(!S)return authDlg();dlg(`<h2>Subscription required</h2><p class="small">Creating, testing, deploying and using the API need an active subscription${A&&A.status==='expired'?' (yours expired on '+fd(A.period_end)+')':''}. ${A?money()+' includes '+nf(A.credits_per_period)+' credits per billing period.':''} Browsing the leaderboard stays free.</p><button class="btn" id="xS">Subscribe${A?' · '+money():''}</button><button class="btn sec" data-x>Not now</button><div class="err" id="xE"></div>`,()=>$('#xS').onclick=()=>subscribe().catch(e=>$('#xE').textContent=e.message))}
 /* ---- auth (Supabase Auth; sessions persist) ---- */
-function authDlg(mode='in'){if(!sb){tab('board');return}dlg(`<h2>${mode==='in'?'Sign in':'Create account'}</h2>${mode==='up'?'<label>Display name (shown on the leaderboard)</label><input id="aN" maxlength="40">':''}<label>Email</label><input id="aE" type="email" autocomplete="username"><label>Password</label><input id="aP" type="password" autocomplete="${mode==='in'?'current-password':'new-password'}"><button class="btn" id="aGo">${mode==='in'?'Sign in':'Create account'}</button><button class="btn sec" id="aSw">${mode==='in'?'Create account':'I have an account'}</button><div class="err" id="aM"></div>`,c=>{
+async function authDlg(mode='in'){if(!sb){try{await (sbReady||initSB())}catch(e){const m=document.getElementById('whoTxt');if(m)m.textContent=e.message;return}}dlg(`<h2>${mode==='in'?'Sign in':'Create account'}</h2>${mode==='up'?'<label>Display name (shown on the leaderboard)</label><input id="aN" maxlength="40">':''}<label>Email</label><input id="aE" type="email" autocomplete="username"><label>Password</label><input id="aP" type="password" autocomplete="${mode==='in'?'current-password':'new-password'}"><button class="btn" id="aGo">${mode==='in'?'Sign in':'Create account'}</button><button class="btn sec" id="aSw">${mode==='in'?'Create account':'I have an account'}</button><div class="err" id="aM"></div>`,c=>{
   $('#aSw').onclick=()=>authDlg(mode==='in'?'up':'in');
   $('#aGo').onclick=async()=>{const e=$('#aE').value.trim().toLowerCase(),p=$('#aP').value,m=$('#aM');m.textContent='';
    try{if(!/.+@.+/.test(e)||p.length<8)throw Error('Valid email and a password of 8+ characters required');let r;
@@ -376,9 +376,10 @@ async function loadBilling(){await refreshAcct();const h=await q(sb.from('deploy
  go('#bSub',subscribe);
  }
 /* ---- setup + boot ---- */
+sbReady=initSB();
 (async()=>{const P=new URLSearchParams(location.search);if(P.get('paid')){try{sessionStorage.setItem('novaPaid','1')}catch(e){}}if(P.has('paid')||P.has('canceled'))history.replaceState(null,'',location.pathname);
  try{
- await initSB();
+ await sbReady;
  const{data}=await sb.auth.getSession();
  if(data.session)await onSession(data.session.user);
  sb.auth.onAuthStateChange(async(_event,session)=>{
