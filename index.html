@@ -62,6 +62,12 @@ td{padding:9px 8px;border-bottom:1px solid #f0f0f2;vertical-align:top}tr.row-cli
 .wrapx{overflow-x:auto}pre{background:var(--bg);border-radius:8px;padding:12px;overflow-x:auto;font:12px var(--mono);margin:8px 0}
 .st{display:inline-block;font-size:12px;font-weight:510;padding:1px 9px;border-radius:10px;background:#f1f1f2}.st.active{color:var(--ok);background:rgba(47,158,91,.1)}.st.past_due{color:#b7791f;background:rgba(183,121,31,.12)}.st.cancelled{color:#6f6f78}.st.expired,.st.none{color:var(--bad);background:rgba(208,69,59,.1)}
 .lockmsg{font-size:12.5px;color:var(--mut);margin-top:8px}
+
+/* public landing page */
+.hero{padding:52px 24px 26px;background:linear-gradient(180deg,#fff 0%,#fafafa 100%);border-bottom:1px solid var(--line)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:28px;align-items:center}
+.hero h1{font-size:42px;line-height:1.08;letter-spacing:-1.6px;margin:0 0 12px}.hero p{font-size:16px;line-height:1.6;color:var(--mut);max-width:650px;margin:0 0 18px}.hero-actions{display:flex;gap:8px;flex-wrap:wrap}.hero-actions .btn{height:36px}.hero-price{border:1px solid var(--line);border-radius:16px;padding:20px;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.04)}.hero-price b{font-size:30px;letter-spacing:-1px}.hero-price .small{margin-top:4px}.flow{padding:28px 24px}.flow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.flow-step{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}.flow-step .n{font:11px var(--mono);color:var(--mut);margin-bottom:8px}.flow-step h3{font-size:15px}.flow-step p{color:var(--mut);font-size:13px;margin:0;line-height:1.55}.showcase{margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}.showcase-head{padding:10px 14px;border-bottom:1px solid var(--line);font:12px var(--mono);color:var(--mut)}.showcase-body{padding:16px}.fake-chat{border:1px solid var(--line);border-radius:10px;padding:12px;max-width:560px}.fake-user{display:inline-block;background:#f4f4f5;border-radius:9px;padding:8px 11px;margin-bottom:10px}.fake-ai{font-size:13px;line-height:1.55}.landing-note{margin-top:10px;font-size:12px;color:var(--mut)}
+@media(max-width:760px){.hero-grid{grid-template-columns:1fr}.hero h1{font-size:32px}.flow-grid{grid-template-columns:1fr}}
 </style>
 </head><body>
 <div id="dlg" class="hide"><div class="dbox" id="dbox"></div></div>
@@ -71,7 +77,37 @@ td{padding:9px 8px;border-bottom:1px solid #f0f0f2;vertical-align:top}tr.row-cli
 <div id="banner" class="banner hide"></div><div id="payMsg" class="small" style="padding:10px 24px 0"></div>
 <div class="content">
 <section class="tab on" id="t-board">
-<h2>AI model leaderboard</h2><p class="small">Public rankings of deployed models by replies served. Rankings are for discovery only: nobody can run another creator's model from here.</p><div id="boardBox"></div></section>
+<div class="hero">
+ <div class="hero-grid">
+  <div>
+   <div class="small" style="font-family:var(--mono);margin-bottom:10px">0PRALX · MODEL DEPLOYMENT</div>
+   <h1>Train your own AI. Deploy it on 0pralx.</h1>
+   <p>Nova Trainer lets you train an AI locally and export the trained model. Upload that export to 0pralx to deploy it on our infrastructure and use it through the platform or API.</p>
+   <div class="hero-actions"><button class="btn" id="heroTrain">Train with Nova</button><button class="btn sec" id="heroStart">Sign in / create account</button></div>
+   <div class="landing-note">Already trained a model? Sign in and use <b>Create &amp; deploy</b> to import it.</div>
+  </div>
+  <div class="hero-price"><div class="small">ONE ACCESS PERIOD</div><b>$10</b><div class="small">6,000,000 credits · 30 days · no automatic renewal</div><button class="btn" id="heroBilling">View pricing &amp; access</button></div>
+ </div>
+</div>
+<div class="flow">
+ <h2>How it works</h2>
+ <p class="small">The complete path from a model on your device to a deployed API.</p>
+ <div class="flow-grid">
+  <div class="flow-step"><div class="n">01 · TRAIN</div><h3>Train locally with Nova</h3><p>Use the Nova training site to train your model on your device and export <code>nova-model.json</code> or <code>nova-full-backup.json</code>.</p><button class="btn sec" id="flowTrain" style="margin-top:12px">Open Nova Training</button></div>
+  <div class="flow-step"><div class="n">02 · UPLOAD</div><h3>Import to 0pralx</h3><p>Sign in, open Create &amp; deploy, and upload your exported Nova model. 0pralx validates the trained weights and tokenizer.</p></div>
+  <div class="flow-step"><div class="n">03 · DEPLOY</div><h3>Run it on the server</h3><p>Deploy the model on 0pralx infrastructure, test your own model, and create an API key for server-to-server use.</p></div>
+ </div>
+ <div class="showcase">
+  <div class="showcase-head">EXAMPLE · WHAT THE FLOW LOOKS LIKE</div>
+  <div class="showcase-body"><div class="fake-chat"><div class="fake-user">Hello, what can your model do?</div><div class="fake-ai">Your deployed model answers using the weights you trained and exported through Nova. This is a static preview — it does not consume credits.</div></div></div>
+ </div>
+</div>
+<div class="card">
+ <h2>Public model leaderboard</h2>
+ <p class="small">Discover deployed models and their creators. Public model pages show information and stats; only each creator can run their own model.</p>
+ <div id="boardBox"></div>
+</div>
+</section>
 <section class="tab" id="t-models"><div id="mList"></div></section>
 <section class="tab" id="t-create"><div class="card"><h2>1 · Import your trained model</h2><p class="small">Choose <code>nova-model.json</code> or <code>nova-full-backup.json</code> from the Nova training site. Only the trained weights and tokenizer are used. The server validates them and runs the model on its own hardware.</p>
 <input type="file" id="fImp" accept=".json"><div id="impInfo" class="small" style="margin-top:8px"></div></div>
@@ -164,6 +200,10 @@ function tab(t){if(PROTECTED.includes(t)&&!S)return authDlg();cur=t;
  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+t));document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
  $('#crumb').textContent=TITLES[t];drawBanner();({board:loadBoard,models:loadModels,create:drawCreate,test:drawTest,keys:loadKeys,billing:loadBilling,admin:loadAdmin})[t]().catch(fail)}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.t)};
+$('#heroTrain,#flowTrain').forEach(b=>b&& (b.onclick=()=>window.location.href='/train'));
+$('#heroStart')&&($('#heroStart').onclick=()=>authDlg());
+$('#heroBilling')&&($('#heroBilling').onclick=()=>{if(S)tab('billing');else authDlg()});
+
 /* ---- leaderboard: public data only; there is no run/test path for other people's models ---- */
 async function loadBoard(){if(!sb){$('#boardBox').innerHTML='';return}
  const rows=await q(sb.rpc('deploy_leaderboard',{p_limit:50}));
