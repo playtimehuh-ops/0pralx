@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api-connection", "destination": "/api/api-connection" },
+    { "source": "/api-connection", "destination": "/api/api-connection" }
   ],
   "headers": [
     {
