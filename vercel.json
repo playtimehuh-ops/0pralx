@@ -1,8 +1,6 @@
 {
   "rewrites": [
     { "source": "/api-connection", "destination": "/api/api-connection" },
-    { "source": "/server-training", "destination": "/server-train.html" },
-    { "source": "/server-training/", "destination": "/server-train.html" }
   ],
   "headers": [
     {
