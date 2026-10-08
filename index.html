@@ -127,7 +127,7 @@ const $=s=>document.querySelector(s),nf=n=>Number(n||0).toLocaleString(),hex=n=>
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fd=d=>d?new Date(d).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}):'—';
 const ST={active:'Active',past_due:'Past due',cancelled:'Cancelled',expired:'Expired',none:'Not subscribed'};
-const TITLES={board:'Leaderboard',models:'My models',create:'Create & deploy',test:'Test',keys:'API keys',billing:'Billing',admin:'Payment Reviews'};
+const TITLES={board:'Leaderboard',models:'My models',create:'Create & deploy',test:'Test',keys:'API keys',billing:'Billing',admin:'Payment Reviews',servertraining:'Server Training'};
 const PROTECTED=['models','create','test','keys','billing','admin'];
 let sb=null,SBURL='',S=null,A=null,models=[],pending=null,chatMsgs=[],cur='board',sbReady=null;
 async function initSB(){
@@ -216,7 +216,7 @@ function tab(t){if(PROTECTED.includes(t)&&!S)return authDlg();cur=t;
  $('#crumb').textContent=TITLES[t];drawBanner();({board:loadBoard,models:loadModels,create:drawCreate,test:drawTest,keys:loadKeys,billing:loadBilling,admin:loadAdmin})[t]().catch(fail)}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.t)};
 $('#heroTrain,#flowTrain').forEach(b=>b&& (b.onclick=()=>window.location.href='/train'));
-$('#serverTrainNav')&&($('#serverTrainNav').onclick=()=>window.location.href='/server-training');
+$('#serverTrainNav')&&($('#serverTrainNav').onclick=()=>window.location.href='/server-training/');
 $('#heroStart')&&($('#heroStart').onclick=()=>authDlg());
 $('#heroBilling')&&($('#heroBilling').onclick=()=>{if(S)tab('billing');else authDlg()});
 
