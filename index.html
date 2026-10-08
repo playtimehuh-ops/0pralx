@@ -211,11 +211,11 @@ async function afterPay(){let f=null;try{f=sessionStorage.getItem('novaPaid');se
  for(let i=0;i<12;i++){await refreshAcct();if(A&&A.access){el.textContent='Subscription active: '+nf(A.remaining)+' credits ready.';setTimeout(()=>el.textContent='',8000);return tab('billing')}await new Promise(r=>setTimeout(r,2000))}
  el.textContent='Still processing. Your subscription activates automatically once SellAuth confirms.'}
 /* ---- navigation ---- */
-function tab(t){if(PROTECTED.includes(t)&&!S)return authDlg();cur=t;
+function tab(t){if(t==='servertraining'){window.location.href='/server-training/';return}if(PROTECTED.includes(t)&&!S)return authDlg();cur=t;
  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+t));document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
  $('#crumb').textContent=TITLES[t];drawBanner();({board:loadBoard,models:loadModels,create:drawCreate,test:drawTest,keys:loadKeys,billing:loadBilling,admin:loadAdmin})[t]().catch(fail)}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.t)};
-$('#heroTrain,#flowTrain').forEach(b=>b&& (b.onclick=()=>window.location.href='/train'));
+document.querySelectorAll('#heroTrain,#flowTrain').forEach(b=>b.onclick=()=>window.location.href='/train');
 $('#serverTrainNav')&&($('#serverTrainNav').onclick=()=>window.location.href='/server-training/');
 $('#heroStart')&&($('#heroStart').onclick=()=>authDlg());
 $('#heroBilling')&&($('#heroBilling').onclick=()=>{if(S)tab('billing');else authDlg()});
