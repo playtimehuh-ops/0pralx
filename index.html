@@ -216,7 +216,7 @@ function tab(t){if(PROTECTED.includes(t)&&!S)return authDlg();cur=t;
  $('#crumb').textContent=TITLES[t];drawBanner();({board:loadBoard,models:loadModels,create:drawCreate,test:drawTest,keys:loadKeys,billing:loadBilling,admin:loadAdmin})[t]().catch(fail)}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.t)};
 $('#heroTrain,#flowTrain').forEach(b=>b&& (b.onclick=()=>window.location.href='/train'));
-$('#serverTrainNav')&&($('#serverTrainNav').onclick=()=>window.location.href='/server-train.html');
+$('#serverTrainNav')&&($('#serverTrainNav').onclick=()=>window.location.href='/server-training');
 $('#heroStart')&&($('#heroStart').onclick=()=>authDlg());
 $('#heroBilling')&&($('#heroBilling').onclick=()=>{if(S)tab('billing');else authDlg()});
 
