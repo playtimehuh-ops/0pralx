@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>0pralx — Server Training</title>
+<style>
+:root{--bg:#09090b;--panel:#111114;--line:#27272b;--text:#f4f4f5;--muted:#9b9ba4;--accent:#5e6ad2;--green:#43b581}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px Inter,system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:48px 22px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}.brand{font-weight:700;font-size:18px}.back{color:var(--muted);text-decoration:none}
+h1{font-size:34px;margin:0 0 8px;letter-spacing:-1px}.sub{color:var(--muted);margin-bottom:28px}
+.grid{display:grid;grid-template-columns:1.3fr .7fr;gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}textarea{width:100%;min-height:360px;background:#0c0c0f;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:14px;resize:vertical;font:13px/1.55 ui-monospace,monospace;outline:none}textarea:focus{border-color:#4a4a52}
+.file{margin-top:12px;color:var(--muted);font-size:12px}.stat{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line)}.stat:last-child{border:0}.stat span{color:var(--muted)}.money{font-size:30px;font-weight:700;margin:18px 0 4px}.rate{color:var(--muted);font-size:12px}
+button{width:100%;border:0;border-radius:9px;padding:12px;background:var(--accent);color:#fff;font-weight:650;cursor:pointer;margin-top:18px}button:disabled{opacity:.4;cursor:not-allowed}.note{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.55}.status{margin-top:18px;padding:12px;border:1px solid var(--line);border-radius:10px;color:var(--muted);white-space:pre-wrap}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><div class="brand">0pralx</div><a class="back" href="/">← Back</a></div>
+<h1>Server Training</h1>
+<div class="sub">Move heavy training off the device. Pricing is calculated from the dataset character count.</div>
+<div class="grid">
+<section class="card">
+<label for="data">Training data</label>
+<textarea id="data" placeholder="Paste your training text here…"></textarea>
+<input id="file" class="file" type="file" accept=".txt,.md,.json,.csv">
+<div class="status" id="status">Waiting for training data.</div>
+</section>
+<aside class="card">
+<div class="stat"><span>Characters</span><b id="chars">0</b></div>
+<div class="stat"><span>Rate</span><b>$2 / 1M chars</b></div>
+<div class="stat"><span>Billing units</span><b id="units">0.00</b></div>
+<div class="money" id="cost">$0.00</div>
+<div class="rate">Estimated server-training cost</div>
+<button id="start">Start Server Training</button>
+<div class="note">The price is calculated before submission. Training should only begin after the final cost is shown.</div>
+</aside>
+</div>
+</div>
+<script>
+const data=document.getElementById('data'), file=document.getElementById('file'), chars=document.getElementById('chars'), units=document.getElementById('units'), cost=document.getElementById('cost'), status=document.getElementById('status'), start=document.getElementById('start');
+function update(){const n=data.value.length;chars.textContent=n.toLocaleString();units.textContent=(n/1000000).toFixed(2);cost.textContent='$'+(n/1000000*2).toFixed(2)}
+data.addEventListener('input',update);
+file.addEventListener('change',async()=>{const f=file.files[0];if(!f)return;data.value=await f.text();status.textContent='Loaded '+f.name;update()});
+start.addEventListener('click',async()=>{
+ const text=data.value; if(!text){status.textContent='Add training data first.';return}
+ const n=text.length, price=n/1000000*2;
+ if(!confirm('Start server training for $'+price.toFixed(2)+'?'))return;
+ start.disabled=true;status.textContent='Preparing server-training request…';
+ try{
+  const r=await fetch('/api/server-train',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'estimate',characters:n})});
+  const j=await r.json(); if(!r.ok)throw new Error(j.error?.message||'Request failed');
+  status.textContent='Server-training request prepared.\nCharacters: '+j.characters.toLocaleString()+'\nEstimated cost: $'+j.estimated_cost.toFixed(2)+'\n\nA production training worker must be connected before a paid job is started.';
+ }catch(e){status.textContent='Could not prepare request: '+e.message}
+ start.disabled=false;
+});
+update();
+</script>
+</body>
+</html>
