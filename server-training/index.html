@@ -1,6 +1,90 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>0pralx — Server Training</title><style>
-body{margin:0;background:#08080a;color:#eee;font:14px system-ui}.wrap{max-width:900px;margin:auto;padding:48px 22px}.top{display:flex;justify-content:space-between}.muted{color:#92929b}.grid{display:grid;grid-template-columns:1fr 300px;gap:16px;margin-top:24px}.card{background:#111114;border:1px solid #29292e;border-radius:16px;padding:20px}textarea{width:100%;height:350px;box-sizing:border-box;background:#0b0b0e;color:#eee;border:1px solid #29292e;border-radius:10px;padding:14px;font:13px monospace}input{margin-top:12px}.stat{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #29292e}.cost{font-size:30px;font-weight:700;margin:22px 0 4px}button{width:100%;padding:13px;border:0;border-radius:9px;background:#665cff;color:white;font-weight:700;margin-top:18px}button:disabled{opacity:.4}.status{margin-top:18px;padding:12px;border:1px solid #29292e;border-radius:10px;white-space:pre-wrap}.warn{margin-top:14px;padding:12px;border:1px solid #604b20;border-radius:10px;color:#e7c77a}@media(max-width:700px){.grid{grid-template-columns:1fr}}</style></head><body><div class="wrap"><div class="top"><b>0pralx</b><a class="muted" href="/">← Back</a></div><h1>Server Training</h1><p class="muted">Train on the server using your 0pralx credits. $2 per 1,000,000 characters.</p><div class="grid"><section class="card"><b>Training data</b><textarea id="data" placeholder="Paste training data here…"></textarea><input id="file" type="file" accept=".txt,.md,.json,.csv"><div class="status" id="status">Waiting for training data.</div></section><aside class="card"><div class="stat"><span>Characters</span><b id="chars">0</b></div><div class="stat"><span>Rate</span><b>$2 / 1M</b></div><div class="stat"><span>Credits required</span><b id="credits">0</b></div><div class="cost" id="cost">$0.00</div><div class="muted">Training cost</div><div class="warn">You must have at least <b>$2.00</b> worth of available credits before Server Training can start.</div><button id="start">Start Server Training</button></aside></div></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
-const sb=supabase.createClient("https://jtstdajaaasucialvsfs.supabase.co","sb_publishable_1O9wO2dY_ZFFfdPFGaLeMA_3oaW2Hs-");const data=document.querySelector("#data"),file=document.querySelector("#file"),chars=document.querySelector("#chars"),credits=document.querySelector("#credits"),cost=document.querySelector("#cost"),status=document.querySelector("#status"),start=document.querySelector("#start");
-function update(){let n=data.value.length;chars.textContent=n.toLocaleString();credits.textContent=Math.ceil(n/1e6*1200000).toLocaleString();cost.textContent="$"+(n/1e6*2).toFixed(2)}data.oninput=update;file.onchange=async()=>{if(file.files[0]){data.value=await file.files[0].text();status.textContent="Loaded "+file.files[0].name;update()}};
-start.onclick=async()=>{let n=data.value.length;if(!n){status.textContent="Add training data first.";return}let price=n/1e6*2;if(price<=0){status.textContent="Add training data first.";return}if(!confirm("Start server training for $"+price.toFixed(2)+"? Once started, it cannot be cancelled."))return;start.disabled=true;status.textContent="Checking credits…";try{let {data:{session}}=await sb.auth.getSession();if(!session)throw Error("Sign in first.");let r=await fetch("https://jtstdajaaasucialvsfs.supabase.co/functions/v1/server-training",{method:"POST",headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},body:JSON.stringify({action:"start",characters:n,name:"Nova Server Model"})});let j=await r.json();if(!r.ok)throw Object.assign(Error(j.error||"Training could not start."),{code:j.code});status.textContent="Training job started.\\nJob: "+j.job_id+"\\nCredits reserved: "+j.credits_charged.toLocaleString()+"\\nStatus: "+j.status+"\\n\\nCancellation is disabled once compute starts."}catch(e){status.textContent=e.message}finally{start.disabled=false}};update();
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nova · Remote Training</title>
+<style>
+:root{color-scheme:dark;--bg:#09090c;--panel:#111116;--line:#292932;--muted:#9292a2;--text:#f4f4f8;--accent:#8b7cff;--green:#8cf0b4}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#211c42 0,transparent 55%),var(--bg);color:var(--text);font:14px Inter,ui-sans-serif,system-ui,sans-serif}.wrap{max-width:1120px;margin:auto;padding:30px 22px 60px}.top{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:18px}.brand{font-weight:850;letter-spacing:-.04em;font-size:19px}.muted{color:var(--muted)}a{color:#b9b1ff;text-decoration:none}.eyebrow{font:11px ui-monospace,monospace;letter-spacing:.15em;text-transform:uppercase;color:#a69cff;margin-top:28px}h1{font-size:clamp(28px,4vw,42px);letter-spacing:-.05em;margin:8px 0}.intro{color:var(--muted);max-width:700px;line-height:1.6}.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;margin-top:25px}.card{background:rgba(17,17,22,.94);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0}.card h2{font-size:14px;margin:0 0 14px}.textarea{width:100%;height:280px;resize:vertical;background:#0b0b10;color:var(--text);border:1px solid #333340;border-radius:10px;padding:14px;font:13px/1.6 ui-monospace,monospace;outline:none}.textarea:focus,input:focus{border-color:var(--accent)}input[type=file]{max-width:100%;margin-top:12px;color:var(--muted)}.hint{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px}.stat{display:flex;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}.stat span{color:var(--muted)}.cost{font-size:30px;font-weight:800;letter-spacing:-.04em;margin:22px 0 3px}.warn{margin-top:16px;padding:12px;border:1px solid #5b4a2d;background:#29211444;border-radius:10px;color:#e8cc91;font-size:12px;line-height:1.5}.button{width:100%;padding:13px 14px;border:1px solid transparent;border-radius:10px;background:var(--accent);color:white;font-weight:750;margin-top:16px;cursor:pointer}.button.secondary{background:#191922;border-color:#383845}.button:disabled{opacity:.45;cursor:not-allowed}.status{margin-top:18px;background:#0b0b10;border:1px solid var(--line);border-radius:10px;padding:14px;white-space:pre-wrap;overflow-wrap:anywhere;color:#d8d8e2;line-height:1.55;min-height:58px}.status.good{border-color:#285d42;color:var(--green)}.status.bad{border-color:#714040;color:#ffb3b3}.progress{height:6px;border-radius:10px;background:#272731;overflow:hidden;margin-top:13px}.bar{height:100%;width:0;background:linear-gradient(90deg,#8171ff,#8cf0b4);transition:width .25s}.log{max-height:160px;overflow:auto;font:11px/1.6 ui-monospace,monospace;color:#a9a9b8;margin-top:12px;white-space:pre-wrap}.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:6px 9px;color:var(--muted);font-size:11px}.dot{width:6px;height:6px;border-radius:50%;background:#777}.dot.on{background:var(--green)}.small{font-size:11px;color:var(--muted)}@media(max-width:780px){.grid{grid-template-columns:1fr}.wrap{padding:20px 14px}.textarea{height:230px}}
+</style>
+</head>
+<body><main class="wrap">
+<header class="top"><div class="brand">NOVA <span class="muted" style="font-weight:500">/ REMOTE LAB</span></div><a href="/">← Back to 0pralx</a></header>
+<div class="eyebrow">Cloud compute · Server-side training</div>
+<h1>Train Nova remotely.</h1>
+<p class="intro">Send your dataset to the server, train real model weights, watch job progress, and export the trained model plus tokenizer. Free-tier compute is best for small experiments; jobs are limited by the serverless runtime.</p>
+<div class="grid">
+<section class="card"><h2>01 / Training dataset</h2>
+<textarea id="data" class="textarea" placeholder="Paste your training text here…"></textarea>
+<input id="file" type="file" accept=".txt,.md,.json,.csv,.jsonl">
+<div class="hint">Text files and small datasets only. Maximum 2,000,000 characters. Training data is uploaded to private storage for the signed-in account.</div>
+<div id="status" class="status">Waiting for dataset. Sign in to 0pralx before starting a job.</div>
+<div class="progress"><div class="bar" id="bar"></div></div><div id="log" class="log">[idle] Remote trainer ready.</div>
+</section>
+<aside class="card"><h2>02 / Job configuration</h2>
+<div class="pill"><span class="dot" id="dot"></span><span id="serverState">Server status · idle</span></div>
+<div class="stat"><span>Dataset characters</span><b id="chars">0</b></div>
+<div class="stat"><span>Estimated credits</span><b id="credits">0</b></div>
+<div class="stat"><span>Training steps</span><b>8–64</b></div>
+<div class="stat"><span>Model format</span><b>Nova JSON</b></div>
+<div class="cost" id="cost">$0.00</div><div class="small">Estimate at $2 / 1M characters; final credit charge is controlled by the server.</div>
+<div class="warn">Small transformer, CPU-friendly settings. Free-tier serverless functions can time out; this is not a free GPU guarantee. Never put secret keys in the dataset.</div>
+<button class="button" id="start">Start remote training</button>
+<button class="button secondary" id="refresh" disabled>Refresh job status</button>
+<button class="button secondary" id="export" disabled>Export trained model JSON</button>
+</aside>
+</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SBURL="https://jtstdajaaasucialvsfs.supabase.co";
+const SBKEY="sb_publishable_1O9wO2dY_ZFFfdPFGaLeMA_3oaW2Hs-";
+const sb=window.supabase.createClient(SBURL,SBKEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const $=id=>document.getElementById(id);
+const data=$("data"),file=$("file"),status=$("status"),start=$("start"),refresh=$("refresh"),exportBtn=$("export"),log=$("log"),bar=$("bar");
+let activeJob=null,trainedModel=null,logs=[];
+function logLine(s){logs.push(new Date().toLocaleTimeString()+"  "+s);if(logs.length>80)logs=logs.slice(-80);log.textContent=logs.join("\n");log.scrollTop=log.scrollHeight}
+function setStatus(s,kind=""){status.textContent=s;status.className="status"+(kind?" "+kind:"")}
+function update(){const n=data.value.length;$("chars").textContent=n.toLocaleString();$("credits").textContent=Math.ceil(n/1e6*1200000).toLocaleString();$("cost").textContent="$"+(n/1e6*2).toFixed(4);start.disabled=!n||n>2e6}
+data.addEventListener("input",update);
+file.addEventListener("change",async()=>{const f=file.files?.[0];if(!f)return;if(f.size>5*1024*1024){setStatus("File is too large. Use a file under 5 MB.","bad");return}data.value=await f.text();setStatus("Loaded "+f.name+". Review your dataset, then start training.");logLine("Loaded local file: "+f.name);update()});
+async function getSession(){const {data:{session},error}=await sb.auth.getSession();if(error)throw error;if(!session)throw Error("Sign in at 0pralx first, then return to this page.");return session}
+async function edge(session,body){const r=await fetch(SBURL+"/functions/v1/server-training",{method:"POST",headers:{apikey:SBKEY,Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||j.message||"Training service request failed ("+r.status+").");return j}
+async function startJob(){
+ const text=data.value;if(!text.trim()){setStatus("Add training text first.","bad");return}if(text.length>2e6){setStatus("Dataset exceeds the 2,000,000 character limit.","bad");return}
+ start.disabled=true;refresh.disabled=true;exportBtn.disabled=true;trainedModel=null;bar.style.width="0%";$("dot").className="dot on";$("serverState").textContent="Server status · connecting";
+ try{
+  const session=await getSession();setStatus("Uploading dataset to private storage…");logLine("Authenticated session confirmed.");
+  const path=session.user.id+"/training-"+crypto.randomUUID()+".txt";
+  const upload=await sb.storage.from("nova-deploy-models").upload(path,new Blob([text],{type:"text/plain;charset=utf-8"}),{contentType:"text/plain;charset=utf-8",upsert:false});
+  if(upload.error)throw Error("Private dataset upload failed: "+upload.error.message);
+  logLine("Dataset uploaded to private storage ("+text.length.toLocaleString()+" characters).");
+  setStatus("Creating training job and checking account credits…");
+  const job=await edge(session,{action:"start",characters:text.length,name:"Nova Server Model",input_path:path});
+  activeJob=job.job_id||job.job?.id||job.id;if(!activeJob)throw Error("The server did not return a job ID.");
+  refresh.disabled=false;$("serverState").textContent="Server status · job queued";logLine("Job created: "+activeJob);setStatus("Job created. Starting server-side training…");
+  await runWorker(session,activeJob);
+ }catch(e){setStatus(e.message||"Could not start training.","bad");logLine("ERROR: "+(e.message||e));$("serverState").textContent="Server status · error";$("dot").className="dot"}
+ finally{start.disabled=!data.value.length||data.value.length>2e6}
+}
+async function runWorker(session,jobId){
+ $("serverState").textContent="Server status · training";logLine("Invoking server-side trainer.");
+ try{
+  const r=await fetch("/api/server-training",{method:"POST",headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},body:JSON.stringify({jobId})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw Error(j.error||"Trainer returned HTTP "+r.status);
+  if(j.model&&j.model.format==="nova-model"){trainedModel=j.model;exportBtn.disabled=false}
+  const job=j.job||{};const done=Number(job.steps_done||j.steps||0),total=Number(job.total_steps||j.steps||0);
+  if(total)bar.style.width=Math.min(100,done/total*100)+"%";
+  $("serverState").textContent="Server status · "+(job.status||"completed");$("dot").className="dot on";
+  setStatus("Training request finished.\nJob: "+jobId+"\nStatus: "+(job.status||"completed")+"\nSteps: "+(j.steps??done)+"\nParameters: "+(j.parameters??"available in model export")+"\nFinal loss: "+(j.loss??"not reported"),"good");
+  logLine("Trainer response received. Status: "+(job.status||"completed"));
+  if(job.status==="completed")bar.style.width="100%";
+  refresh.disabled=false;
+ }catch(e){setStatus("Training request did not finish cleanly: "+e.message+"\nUse Refresh job status to check whether the job was saved.","bad");logLine("ERROR: "+e.message);refresh.disabled=false}
+}
+async function refreshJob(){if(!activeJob){setStatus("No job ID in this session yet.","bad");return}refresh.disabled=true;try{const session=await getSession();const j=await edge(session,{action:"status",jobId:activeJob});const job=j.job||j;const done=Number(job.steps_done||0),total=Number(job.total_steps||0);if(total)bar.style.width=Math.min(100,done/total*100)+"%";$("serverState").textContent="Server status · "+(job.status||"unknown");setStatus("Job: "+activeJob+"\nStatus: "+(job.status||"unknown")+"\nProgress: "+done+(total?"/"+total:" steps")+"\n"+(job.error||""),job.status==="completed"?"good":job.status==="failed"?"bad":"");logLine("Status refreshed: "+(job.status||"unknown"));if(job.status==="completed")bar.style.width="100%"}catch(e){setStatus(e.message,"bad")}finally{refresh.disabled=false}}
+function exportModel(){if(!trainedModel){setStatus("No model payload is available to export yet. If the job completed, refresh status or run training again to retrieve the artifact.","bad");return}const blob=new Blob([JSON.stringify(trainedModel)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="nova-model.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);logLine("Exported nova-model.json including weights and tokenizer.");}
+start.addEventListener("click",startJob);refresh.addEventListener("click",refreshJob);exportBtn.addEventListener("click",exportModel);
+update();
 </script></body></html>
