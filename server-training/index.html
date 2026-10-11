@@ -60,7 +60,7 @@ async function startJob(){
   if(upload.error)throw Error("Private dataset upload failed: "+upload.error.message);
   logLine("Dataset uploaded to private storage ("+text.length.toLocaleString()+" characters).");
   setStatus("Creating training job and checking account credits…");
-  const job=await edge(session,{action:"start",characters:text.length,name:"Nova Server Model",input_path:path});
+  const job=await edge(session,{action:"start",characters:text.length,text,name:"Nova Server Model",input_path:path});
   activeJob=job.job_id||job.job?.id||job.id;if(!activeJob)throw Error("The server did not return a job ID.");
   refresh.disabled=false;$("serverState").textContent="Server status · job queued";logLine("Job created: "+activeJob);setStatus("Job created. Starting server-side training…");
   await runWorker(session,activeJob);
