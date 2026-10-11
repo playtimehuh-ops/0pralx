@@ -9,7 +9,7 @@
 </style>
 </head>
 <body><main class="wrap">
-<header class="top"><div class="brand">NOVA <span class="muted" style="font-weight:500">/ REMOTE LAB</span></div><a href="/">← Back to 0pralx</a></header>
+<header class="top"><div class="brand">NOVA <span class="muted" style="font-weight:500">/ REMOTE LAB</span></div><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span id="authUser" class="muted">Checking session…</span><button id="authButton" class="button secondary" style="width:auto;margin:0;padding:9px 12px">Sign in</button><a href="/">← Back to 0pralx</a></div></header>
 <div class="eyebrow">Cloud compute · Server-side training</div>
 <h1>Train Nova remotely.</h1>
 <p class="intro">Send your dataset to the server, train real model weights, watch job progress, and export the trained model plus tokenizer. Free-tier compute is best for small experiments; jobs are limited by the serverless runtime.</p>
@@ -40,6 +40,10 @@
 const SBURL="https://jtstdajaaasucialvsfs.supabase.co";
 const SBKEY="sb_publishable_1O9wO2dY_ZFFfdPFGaLeMA_3oaW2Hs-";
 const sb=window.supabase.createClient(SBURL,SBKEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const authButton=document.getElementById("authButton"),authUser=document.getElementById("authUser");
+async function paintAuth(){const {data:{session}}=await sb.auth.getSession();authUser.textContent=session?.user?.email||"Not signed in";authButton.textContent=session?"Sign out":"Sign in";authButton.onclick=async()=>{if(session){await sb.auth.signOut();authUser.textContent="Not signed in";authButton.textContent="Sign in";authButton.onclick=()=>location.assign("/?auth=signin&returnTo="+encodeURIComponent("/server-training/"));setStatus("Signed out. Sign in again to start a training job.");logLine("Signed out.");}else location.assign("/?auth=signin&returnTo="+encodeURIComponent("/server-training/"));};}
+sb.auth.onAuthStateChange(()=>{paintAuth().catch(()=>{});});
+
 const $=id=>document.getElementById(id);
 const data=$("data"),file=$("file"),status=$("status"),start=$("start"),refresh=$("refresh"),exportBtn=$("export"),log=$("log"),bar=$("bar");
 let activeJob=null,trainedModel=null,logs=[];
@@ -48,7 +52,7 @@ function setStatus(s,kind=""){status.textContent=s;status.className="status"+(ki
 function update(){const n=data.value.length;$("chars").textContent=n.toLocaleString();$("credits").textContent=Math.ceil(n/1e6*1200000).toLocaleString();$("cost").textContent="$"+(n/1e6*2).toFixed(4);start.disabled=!n||n>2e6}
 data.addEventListener("input",update);
 file.addEventListener("change",async()=>{const f=file.files?.[0];if(!f)return;if(f.size>5*1024*1024){setStatus("File is too large. Use a file under 5 MB.","bad");return}data.value=await f.text();setStatus("Loaded "+f.name+". Review your dataset, then start training.");logLine("Loaded local file: "+f.name);update()});
-async function getSession(){const {data:{session},error}=await sb.auth.getSession();if(error)throw error;if(!session)throw Error("Sign in at 0pralx first, then return to this page.");return session}
+async function getSession(){const {data:{session},error}=await sb.auth.getSession();if(error)throw error;if(!session){location.assign("/?auth=signin&returnTo="+encodeURIComponent("/server-training/"));throw Error("Opening the 0pralx sign-in screen…")}return session}
 async function edge(session,body){const r=await fetch(SBURL+"/functions/v1/server-training",{method:"POST",headers:{apikey:SBKEY,Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||j.message||"Training service request failed ("+r.status+").");return j}
 async function startJob(){
  const text=data.value;if(!text.trim()){setStatus("Add training text first.","bad");return}if(text.length>2e6){setStatus("Dataset exceeds the 2,000,000 character limit.","bad");return}
