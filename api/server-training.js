@@ -75,10 +75,11 @@ export default async function handler(req, res) {
     if (!job) return res.status(404).json({ error: "Training job not found." });
     if (job.status === "completed") return res.status(200).json({ ok: true, job });
     if (job.status === "failed") return res.status(409).json({ error: job.error || "This training job has failed.", job });
+    const submittedText = typeof body.text === "string" ? body.text : "";
     const path = String(job.metadata?.input_path || "");
-    if (!path) throw new Error("Training input is missing. The job service must save input_path in job metadata.");
+    if (!submittedText && !path) throw new Error("Training input is missing. Please submit the dataset with the job.");
     await edge(jwt, { action: "progress", jobId, steps_done: 0, total_steps: 0, phase: "preparing" });
-    const text = await downloadInput(jwt, path);
+    const text = submittedText || await downloadInput(jwt, path);
     const model = await train(text, async (done, total, loss) => {
       await edge(jwt, { action: "progress", jobId, steps_done: done, total_steps: total, loss, phase: "training" });
     });
