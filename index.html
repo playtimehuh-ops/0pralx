@@ -125,7 +125,7 @@ function authDlg(mode='in'){if(!sb){tab('board');return}dlg(`<h2>${mode==='in'?'
     if(mode==='up'){const n=$('#aN').value.trim();if(n.length<2)throw Error('Choose a display name (2+ characters)');r=await sb.auth.signUp({email:e,password:p,options:{data:{display_name:n}}});if(r.error)throw r.error;
      if(!r.data.session){m.style.color='var(--ok)';m.textContent='Account created. Confirm the email we sent, then sign in.';return}}
     else{r=await sb.auth.signInWithPassword({email:e,password:p});if(r.error)throw r.error}
-    c();await onSession(r.data.session.user);tab(PROTECTED.includes(cur)?cur:'models')}catch(x){m.style.color='';m.textContent=x.message}}})}
+    c();await onSession(r.data.session.user);const returnTo=new URLSearchParams(location.search).get('returnTo');if(returnTo&&returnTo.startsWith('/')&&!returnTo.startsWith('//')){location.assign(returnTo);return}tab(PROTECTED.includes(cur)?cur:'models')}catch(x){m.style.color='';m.textContent=x.message}}})}
 async function onSession(u){let p=await q(sb.from('deploy_profiles').select('display_name').eq('id',u.id).maybeSingle());
  if(!p){const dn=((u.user_metadata&&u.user_metadata.display_name)||u.email.split('@')[0]).slice(0,40).padEnd(2,'_');await q(sb.from('deploy_profiles').insert({id:u.id,display_name:dn}));p={display_name:dn}}
  S={id:u.id,email:u.email,name:p.display_name};$('#whoTxt').textContent=S.email;$('#bAuth').textContent='Sign out';await refreshAcct();await refreshAdmin();afterPay()}
@@ -368,5 +368,6 @@ async function loadBilling(){await refreshAcct();const h=await q(sb.from('deploy
  document.getElementById('legalClose').onclick=()=>ov.style.display='none';
  ov.addEventListener('click',e=>{if(e.target===ov)ov.style.display='none'});
 })();
+if(new URLSearchParams(location.search).get('auth')==='signin'&&!S)authDlg('in');
 </script>
 </body></html>
