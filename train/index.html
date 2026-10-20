@@ -1416,6 +1416,18 @@ sel.addEventListener('change',()=>{apply(sel.value);try{localStorage.setItem('no
 (function(){
   const form=document.getElementById('accessForm');
   if(!form) return;
+
+  // Local copies of Nova should remain usable without a deployed verifier or API.
+  // The hosted workspace still requires its server-checked access code.
+  const isLocal = location.protocol === 'file:' ||
+    location.hostname === 'localhost' ||
+    location.hostname === '127.0.0.1' ||
+    location.hostname === '[::1]';
+  if(isLocal){
+    document.body.classList.add('access-granted');
+    return;
+  }
+
   const input=document.getElementById('accessCode');
   const button=document.getElementById('accessContinue');
   const status=document.getElementById('accessStatus');
