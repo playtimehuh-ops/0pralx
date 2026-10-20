@@ -63,8 +63,47 @@ h2{font-size:15px;margin:0 0 12px;font-weight:590;letter-spacing:-.2px}h3{font-s
 @media(max-width:760px){body{flex-direction:column;overflow:auto}.appshell{flex-direction:column;height:auto}nav.rail{width:100%;flex-direction:row;flex-wrap:wrap}nav.rail button{width:auto}.ws,.sbf{display:none}.panel{margin:0 8px 8px;min-height:85vh}header .status{display:none}}
 @media(prefers-reduced-motion:reduce){#bootOverlay{animation:none!important;opacity:0!important;visibility:hidden!important}#bootOverlay svg *{animation:none!important}}
 </style>
+
+<style id="train-access-gate-styles">
+  body:not(.access-granted) .appshell { display: none !important; }
+  #accessGate { min-height:100vh; box-sizing:border-box; display:flex; align-items:center; justify-content:center; padding:28px 18px; background:#f4f2ed; color:#171a22; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+  body.access-granted #accessGate { display:none; }
+  .access-card { width:min(100%,430px); box-sizing:border-box; border:1px solid #d8d6d0; background:#fffefa; padding:30px; box-shadow:0 18px 55px rgba(22,27,40,.08); }
+  .access-mark { width:38px;height:38px;display:grid;place-items:center;background:#171a22;color:#c8f169;font-weight:800;letter-spacing:-.06em;margin-bottom:28px; }
+  .access-eyebrow { font:600 11px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:#656a73; }
+  .access-card h1 { font-size:clamp(28px,6vw,36px);letter-spacing:-.055em;line-height:1.05;margin:12px 0 12px;font-weight:750; }
+  .access-copy { color:#626773;line-height:1.6;font-size:14px;margin:0 0 24px; }
+  .access-price { display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-top:1px solid #e6e3dc;border-bottom:1px solid #e6e3dc;margin-bottom:22px; }
+  .access-price span:first-child { font-size:13px;color:#626773; }
+  .access-price strong { font-size:20px;letter-spacing:-.04em; }
+  .access-label { display:block;font-size:12px;font-weight:650;margin:0 0 8px; }
+  #accessCode { width:100%;box-sizing:border-box;padding:13px 12px;border:1px solid #c9c8c2;background:#fffefa;color:#171a22;font:14px ui-monospace,SFMono-Regular,Consolas,monospace;outline:none; }
+  #accessCode:focus { border-color:#525eac;box-shadow:0 0 0 2px rgba(82,94,172,.12); }
+  #accessContinue { width:100%;margin-top:12px;border:0;background:#171a22;color:#fff;padding:14px;font-size:13px;font-weight:700;cursor:pointer; }
+  #accessContinue:disabled { opacity:.6;cursor:wait; }
+  #accessStatus { min-height:20px;margin:12px 0 0;font-size:12px;line-height:1.5;color:#a13b35; }
+  .access-foot { border-top:1px solid #e6e3dc;padding-top:16px;margin-top:18px;color:#777b82;font-size:11px;line-height:1.55; }
+  @media(max-width:420px){.access-card{padding:23px}}
+</style>
 </head>
 <body>
+
+<section id="accessGate" aria-labelledby="accessTitle">
+  <div class="access-card">
+    <div class="access-mark" aria-hidden="true">N.</div>
+    <div class="access-eyebrow">Nova / Training workspace</div>
+    <h1 id="accessTitle">Access required.</h1>
+    <p class="access-copy">This training workspace is available by access code. To request one, DM <strong>@notcandymuffin</strong> on Snapchat.</p>
+    <div class="access-price"><span>Access price</span><strong>19.99 SAR</strong></div>
+    <form id="accessForm">
+      <label class="access-label" for="accessCode">Access code</label>
+      <input id="accessCode" name="code" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Enter your code" maxlength="128" required>
+      <button id="accessContinue" type="submit">Continue <span aria-hidden="true">→</span></button>
+      <p id="accessStatus" role="status" aria-live="polite"></p>
+    </form>
+    <p class="access-foot">Please confirm the price and what access includes before paying. The access code is checked on the server and is not displayed on this page.</p>
+  </div>
+</section>
 
 <div id="bootOverlay">
   <svg viewBox="0 0 120 70">
@@ -1371,6 +1410,47 @@ renderDatasets(); renderMemory(); updateModelInfo();
 (function(){const sel=document.getElementById('setTheme'),apply=v=>document.body.classList.toggle('dark',v==='dark');
 let v='light';try{v=localStorage.getItem('novaTheme')||'light'}catch(e){}sel.value=v;apply(v);
 sel.addEventListener('change',()=>{apply(sel.value);try{localStorage.setItem('novaTheme',sel.value)}catch(e){}})})();
+</script>
+
+<script id="train-access-gate-script">
+(function(){
+  const form=document.getElementById('accessForm');
+  if(!form) return;
+  const input=document.getElementById('accessCode');
+  const button=document.getElementById('accessContinue');
+  const status=document.getElementById('accessStatus');
+  form.addEventListener('submit',async function(event){
+    event.preventDefault();
+    const code=input.value.trim();
+    if(!code){status.textContent='Enter your access code.';return;}
+    button.disabled=true;
+    status.textContent='Checking code…';
+    try{
+      const response=await fetch('/api/verify-train-code',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({code})
+      });
+      const data=await response.json().catch(()=>({}));
+      if(response.ok && data.ok===true){
+        document.body.classList.add('access-granted');
+        input.value='';
+        status.textContent='';
+      }else if(response.status===503){
+        status.textContent='Access verification is not configured yet. Please try again later.';
+      }else if(response.status===401){
+        status.textContent='That code is not valid.';
+        input.select();
+      }else{
+        status.textContent=data.error||'Could not verify the code. Please try again.';
+      }
+    }catch(e){
+      status.textContent='Could not connect to the verifier. Check your connection and try again.';
+    }finally{
+      button.disabled=false;
+    }
+  });
+})();
 </script>
 </body>
 </html>
