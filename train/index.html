@@ -628,28 +628,49 @@ class NovaModel {
 
   generate(promptIds, maxTokens, temperature, topK, topP, stopFlag) {
     this.useParams();
+    if (!Array.isArray(promptIds) || promptIds.length === 0) throw new Error('Generation needs at least one prompt token.');
+    for (const id of promptIds) {
+      if (!Number.isInteger(id) || id < 0 || id >= this.vocabSize) throw new Error('Prompt contains an invalid token ID: ' + id);
+    }
+    const limit = Math.max(0, Math.floor(Number(maxTokens) || 0));
+    const temp = Math.max(1e-6, Number(temperature) || 1);
     let ids = promptIds.slice();
     const ctx = this.cfg.ctxLen;
-    for (let step = 0; step < maxTokens; step++) {
+    for (let step = 0; step < limit; step++) {
       if (stopFlag && stopFlag.stop) break;
       const windowIds = ids.slice(Math.max(0, ids.length - ctx));
       const { logits } = this.forward(windowIds, false);
       const Tn = windowIds.length, V = this.vocabSize;
+      if (!Tn || logits.rows !== Tn || logits.cols !== V || logits.data.length !== Tn * V) {
+        throw new Error('Generation received logits with an invalid shape.');
+      }
       const lastOff = (Tn - 1) * V;
       const scaled = new Float32Array(V);
-      for (let j = 0; j < V; j++) scaled[j] = logits.data[lastOff + j] / Math.max(temperature, 1e-6);
-      // Never sample padding, prompt-start, or unknown tokens as visible output.
-      if (this.padId !== undefined) scaled[this.padId] = -1e9;
-      if (this.bosId !== undefined) scaled[this.bosId] = -1e9;
-      if (this.unkId !== undefined) scaled[this.unkId] = -1e9;
+      for (let j = 0; j < V; j++) {
+        const value = logits.data[lastOff + j];
+        if (!Number.isFinite(value)) throw new Error('Generation produced a non-finite logit.');
+        scaled[j] = value / temp;
+      }
+      // Never expose padding, prompt-start, or unknown tokens.
+      if (this.padId >= 0 && this.padId < V) scaled[this.padId] = -1e9;
+      if (this.bosId >= 0 && this.bosId < V) scaled[this.bosId] = -1e9;
+      if (this.unkId >= 0 && this.unkId < V) scaled[this.unkId] = -1e9;
+      // Require at least one visible token before allowing EOS to end the reply.
+      if (step === 0 && this.eosId >= 0 && this.eosId < V) scaled[this.eosId] = -1e9;
       const probs = new Float32Array(V);
       softmaxRow(scaled, probs, 0, V);
       let idxs = Array.from({ length: V }, (_, i) => i).sort((a, b) => probs[b] - probs[a]);
-      if (topK && topK > 0) idxs = idxs.slice(0, topK);
-      if (topP && topP < 1) { let cum = 0; const kept = []; for (const i of idxs) { cum += probs[i]; kept.push(i); if (cum >= topP) break; } idxs = kept; }
+      if (topK && topK > 0) idxs = idxs.slice(0, Math.min(V, Math.floor(topK)));
+      if (topP > 0 && topP < 1) {
+        let cum = 0; const kept = [];
+        for (const i of idxs) { cum += probs[i]; kept.push(i); if (cum >= topP) break; }
+        idxs = kept;
+      }
       let sum = 0; for (const i of idxs) sum += probs[i];
+      if (!idxs.length || !Number.isFinite(sum) || sum <= 0) throw new Error('Generation could not build a valid sampling distribution.');
       let r = Math.random() * sum, chosen = idxs[idxs.length - 1];
       for (const i of idxs) { r -= probs[i]; if (r <= 0) { chosen = i; break; } }
+      if (!Number.isInteger(chosen) || chosen < 0 || chosen >= V) throw new Error('Generation selected an invalid token ID.');
       ids.push(chosen);
       if (this.eosId !== undefined && chosen === this.eosId) break;
     }
@@ -1254,28 +1275,49 @@ document.getElementById('btnRunDiagnostics').onclick = async () => {
 
   ok('Dataset loading', state.datasets.length >= 0, `${state.datasets.length} dataset(s) in memory`);
 
-  let testModel;
+  let testTokenizer = null;
   try {
-    testModel = new NovaModel(60, { dModel: 16, nHeads: 2, nLayers: 1, dFF: 32, ctxLen: 16 });
-    ok('Model initialization', testModel.paramCount() > 0, `${testModel.paramCount()} params`);
+    testTokenizer = new BPETokenizer();
+    testTokenizer.train('the quick brown fox the quick fox function test() { return 1; }', 60);
+    ok('Tokenizer builds vocabulary', testTokenizer.size > 0, `vocab=${testTokenizer.size}`);
+    const ids = testTokenizer.encode('the quick fox');
+    const back = testTokenizer.decode(ids);
+    ok('Tokenizer encode/decode roundtrip', back === 'the quick fox', `got "${back}"`);
+  } catch (err) { ok('Tokenizer', false, err.message); }
+
+  ok('Dataset loading', state.datasets.length >= 0, `${state.datasets.length} dataset(s) in memory`);
+
+  let testModel;
+  const testVocabSize = testTokenizer ? testTokenizer.size : 99;
+  const bos = testTokenizer ? testTokenizer.vocab['<BOS>'] : 1;
+  const eos = testTokenizer ? testTokenizer.vocab['<EOS>'] : 2;
+  const ordinary = testTokenizer && testTokenizer.vocab['t'] !== undefined ? testTokenizer.vocab['t'] : 4;
+  try {
+    testModel = new NovaModel(testVocabSize, { dModel: 16, nHeads: 2, nLayers: 1, dFF: 32, ctxLen: 16 });
+    ok('Model initialization', testModel.paramCount() > 0, `${testModel.paramCount()} params; vocab=${testVocabSize}`);
   } catch (err) { ok('Model initialization', false, err.message); }
 
   let fwdOut;
   try {
-    fwdOut = testModel.forward([1, 2, 3, 4, 5], true);
-    ok('Forward pass', fwdOut.logits.rows === 5 && fwdOut.logits.cols === 60);
+    const sample = [bos, ordinary, ordinary + 1, ordinary + 2, ordinary + 3];
+    fwdOut = testModel.forward(sample, true);
+    ok('Forward pass', fwdOut.logits.rows === sample.length && fwdOut.logits.cols === testVocabSize);
   } catch (err) { ok('Forward pass', false, err.message); }
 
   let lossVal;
   try {
-    lossVal = testModel.evalLoss([[1, 2, 3, 4]], [[2, 3, 4, 5]]);
+    const sample = [bos, ordinary, ordinary + 1, ordinary + 2];
+    const targets = [ordinary, ordinary + 1, ordinary + 2, eos];
+    lossVal = testModel.evalLoss([sample], [targets]);
     ok('Loss calculation', isFinite(lossVal) && lossVal > 0, `loss=${lossVal.toFixed(3)}`);
   } catch (err) { ok('Loss calculation', false, err.message); }
 
   try {
+    const sample = [bos, ordinary, ordinary + 1, ordinary + 2];
+    const targets = [ordinary, ordinary + 1, ordinary + 2, eos];
     const before = testModel.layers[0].wq.W.data.slice(0, 5);
-    const l1 = testModel.trainStep([[1, 2, 3, 4]], [[2, 3, 4, 5]], 0.01);
-    const l2 = testModel.trainStep([[1, 2, 3, 4]], [[2, 3, 4, 5]], 0.01);
+    const l1 = testModel.trainStep([sample], [targets], 0.01);
+    const l2 = testModel.trainStep([sample], [targets], 0.01);
     ok('Backpropagation runs', isFinite(l1) && isFinite(l2));
     let changed = false;
     for (let i = 0; i < 5; i++) if (Math.abs(testModel.layers[0].wq.W.data[i] - before[i]) > 1e-8) changed = true;
@@ -1283,9 +1325,36 @@ document.getElementById('btnRunDiagnostics').onclick = async () => {
   } catch (err) { ok('Backpropagation / weight update', false, err.message); }
 
   try {
-    const gen = testModel.generate([1, 2], 5, 0.8, 10, 0.9, { stop: false });
-    ok('Text generation', gen.length === 7);
+    const originalRandom = Math.random;
+    Math.random = () => 0.5;
+    let generated;
+    try {
+      generated = testModel.generate([bos, ordinary], 5, 0.8, 10, 0.9, { stop: false });
+    } finally { Math.random = originalRandom; }
+    const newIds = generated.slice(2);
+    const validIds = newIds.length >= 1 && newIds.length <= 5 && newIds.every(id => Number.isInteger(id) && id >= 0 && id < testVocabSize);
+    const visibleText = testTokenizer ? testTokenizer.decode(newIds) : '';
+    ok('Text generation', validIds && visibleText.length > 0, `generated=${newIds.length} token(s); decoded length=${visibleText.length}`);
   } catch (err) { ok('Text generation', false, err.message); }
+
+  try {
+    const originalForward = testModel.forward.bind(testModel);
+    let calls = 0;
+    testModel.forward = function(ids, needCache) {
+      const out = originalForward(ids, needCache);
+      const rowOff = (ids.length - 1) * this.vocabSize;
+      for (let j = 0; j < this.vocabSize; j++) out.logits.data[rowOff + j] = -1000;
+      const chosen = calls++ === 0 ? ordinary : eos;
+      out.logits.data[rowOff + chosen] = 1000;
+      return out;
+    };
+    const originalRandom = Math.random;
+    Math.random = () => 0.5;
+    let stopped;
+    try { stopped = testModel.generate([bos, ordinary], 5, 1, 1, 1, { stop: false }); }
+    finally { Math.random = originalRandom; testModel.forward = originalForward; }
+    ok('EOS stopping', stopped.length === 4 && stopped[stopped.length - 1] === eos);
+  } catch (err) { ok('EOS stopping', false, err.message); }
 
   ok('Memory system', Array.isArray(state.memory));
 
