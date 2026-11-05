@@ -1264,17 +1264,6 @@ document.getElementById('btnRunDiagnostics').onclick = async () => {
 
   ok('HTML/JS loaded', true);
 
-  try {
-    const tk = new BPETokenizer();
-    tk.train('the quick brown fox the quick fox function test() { return 1; }', 60);
-    ok('Tokenizer builds vocabulary', tk.size > 0, `vocab=${tk.size}`);
-    const ids = tk.encode('the quick fox');
-    const back = tk.decode(ids);
-    ok('Tokenizer encode/decode roundtrip', back === 'the quick fox', `got "${back}"`);
-  } catch (err) { ok('Tokenizer', false, err.message); }
-
-  ok('Dataset loading', state.datasets.length >= 0, `${state.datasets.length} dataset(s) in memory`);
-
   let testTokenizer = null;
   try {
     testTokenizer = new BPETokenizer();
@@ -1367,7 +1356,7 @@ document.getElementById('btnRunDiagnostics').onclick = async () => {
 
   try {
     const w = testModel.serializeWeights();
-    const clone = new NovaModel(60, testModel.cfg);
+    const clone = new NovaModel(testVocabSize, testModel.cfg);
     clone.loadWeights(w);
     let same = true;
     for (let i = 0; i < 10; i++) if (Math.abs(clone.wte.data[i] - testModel.wte.data[i]) > 1e-6) same = false;
