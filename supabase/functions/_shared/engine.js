@@ -465,6 +465,10 @@ class NovaModel {
 
       const scaled = new Float32Array(this.vocabSize);
       for (let j = 0; j < this.vocabSize; j++) scaled[j] = logits[j] / temp;
+      // Match the regular generator: special control tokens are not user-facing output.
+      if (this.padId !== undefined) scaled[this.padId] = -1e9;
+      if (this.bosId !== undefined) scaled[this.bosId] = -1e9;
+      if (this.unkId !== undefined) scaled[this.unkId] = -1e9;
       const probs = new Float32Array(this.vocabSize);
       softmaxRow(scaled, probs, 0, this.vocabSize);
 
