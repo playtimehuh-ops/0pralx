@@ -81,7 +81,7 @@ class BPETokenizer {
     const words = this._preTokenize(text);
     const wordFreq = new Map();
     for (const w of words) wordFreq.set(w, (wordFreq.get(w) || 0) + 1);
-    const seqs = new Map(); const baseChars = new Set();
+    const seqs = new Map(); const baseChars = new Set(Array.from({ length: 95 }, (_, i) => String.fromCharCode(i + 32)));
     for (const w of wordFreq.keys()) { const arr = Array.from(w); seqs.set(w, arr); for (const c of arr) baseChars.add(c); }
     let vocabList = [...this.specials, ...Array.from(baseChars).sort()];
     const merges = [];
@@ -124,7 +124,7 @@ class BPETokenizer {
     if (addEos) ids.push(this.vocab['<EOS>']);
     return ids;
   }
-  decode(ids) { return ids.map(id => this.idToToken[id] || '').join(''); }
+  decode(ids) { const hidden = new Set(this.specials); return ids.map(id => { const token = this.idToToken[id] || ''; return hidden.has(token) ? '' : token; }).join(''); }
   get size() { return this.idToToken.length; }
   toJSON() { return { idToToken: this.idToToken, merges: this.merges, specials: this.specials }; }
   static fromJSON(obj) { const t = new BPETokenizer(); t.idToToken = obj.idToToken; t.merges = obj.merges; t.specials = obj.specials || t.specials; t.vocab = {}; t.idToToken.forEach((tok, i) => t.vocab[tok] = i); return t; }
@@ -183,6 +183,8 @@ class NovaModel {
   constructor(vocabSize, cfg) {
     this.cfg = Object.assign({ dModel: 48, nHeads: 4, nLayers: 2, dFF: 192, ctxLen: 64 }, cfg);
     this.vocabSize = vocabSize;
+    // Special-token IDs are fixed by BPETokenizer.specials.
+    this.padId = 0; this.bosId = 1; this.eosId = 2; this.unkId = 3;
     PARAMS = [];
     const d = this.cfg.dModel;
     this.wte = newTensorParam(vocabSize, d, 0.02);
@@ -360,6 +362,10 @@ class NovaModel {
       const lastOff = (Tn - 1) * V;
       const scaled = new Float32Array(V);
       for (let j = 0; j < V; j++) scaled[j] = logits.data[lastOff + j] / Math.max(temperature, 1e-6);
+      // Never sample padding, prompt-start, or unknown tokens as visible output.
+      if (this.padId !== undefined) scaled[this.padId] = -1e9;
+      if (this.bosId !== undefined) scaled[this.bosId] = -1e9;
+      if (this.unkId !== undefined) scaled[this.unkId] = -1e9;
       const probs = new Float32Array(V);
       softmaxRow(scaled, probs, 0, V);
       let idxs = Array.from({ length: V }, (_, i) => i).sort((a, b) => probs[b] - probs[a]);
